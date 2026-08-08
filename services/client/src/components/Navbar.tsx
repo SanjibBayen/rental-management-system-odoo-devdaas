@@ -1,16 +1,30 @@
 import { ShoppingCart, Search, Menu, UserCircle, LogOut } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 
-export default function Navbar() {
-  const { user, login, logout, mockUsers } = useAuth();
+interface NavbarProps {
+  activeView: string;
+  setActiveView: (view: string) => void;
+}
+
+export default function Navbar({ activeView, setActiveView }: NavbarProps) {
+  const { user, logout } = useAuth();
   const role = user?.role || 'customer';
+
+  const NavItem = ({ viewId, label }: { viewId: string, label: string }) => (
+    <button 
+      onClick={() => setActiveView(viewId)}
+      className={`${activeView === viewId ? 'text-primary font-bold border-b-2 border-primary pb-1' : 'text-on-surface-variant hover:text-primary transition-colors pb-1 border-b-2 border-transparent'}`}
+    >
+      {label}
+    </button>
+  );
 
   return (
     <header className="bg-white border-b border-border-standard sticky z-50 top-0 shadow-sm">
       <div className="flex justify-between items-center w-full max-w-7xl mx-auto px-margin-desktop py-3">
         {/* Brand */}
         <div className="flex items-center gap-2 text-2xl font-black tracking-tight text-primary cursor-pointer hover:opacity-90 transition-opacity">
-          {/* <div className="w-8 h-8 bg-primary rounded flex items-center justify-center text-white text-lg font-bold"></div> */}
+          <div className="w-8 h-8 bg-primary rounded flex items-center justify-center text-white text-lg font-bold">R</div>
           RentFlow
         </div>
         
@@ -18,21 +32,21 @@ export default function Navbar() {
         <nav className="hidden md:flex items-center gap-8 font-semibold text-sm">
           {role === 'customer' && (
             <>
-              <a className="text-primary font-bold border-b-2 border-primary pb-1" href="#">Catalog</a>
-              <a className="text-on-surface-variant hover:text-primary transition-colors" href="#">My Rentals</a>
+              <NavItem viewId="catalog" label="Catalog" />
+              <NavItem viewId="rentals" label="My Rentals" />
             </>
           )}
           {role === 'admin' && (
             <>
-              <a className="text-primary font-bold border-b-2 border-primary pb-1" href="#">Dashboard</a>
-              <a className="text-on-surface-variant hover:text-primary transition-colors" href="#">Inventory</a>
-              <a className="text-on-surface-variant hover:text-primary transition-colors" href="#">Customers</a>
+              <NavItem viewId="dashboard" label="Dashboard" />
+              <NavItem viewId="inventory" label="Inventory" />
+              <NavItem viewId="customers" label="Customers" />
             </>
           )}
           {role === 'delivery' && (
             <>
-              <a className="text-primary font-bold border-b-2 border-primary pb-1" href="#">Tasks</a>
-              <a className="text-on-surface-variant hover:text-primary transition-colors" href="#">Route</a>
+              <NavItem viewId="tasks" label="Tasks" />
+              <NavItem viewId="route" label="Route" />
             </>
           )}
         </nav>
@@ -63,7 +77,7 @@ export default function Navbar() {
             <div className="flex items-center gap-2">
               <UserCircle className="w-8 h-8 text-on-surface-variant" />
               {user && (
-                <div className="hidden sm:block text-xs">
+                <div className="hidden sm:block text-xs text-left">
                   <p className="font-bold text-on-surface leading-tight">{user.name}</p>
                   <p className="text-outline leading-tight capitalize">{user.role}</p>
                 </div>
