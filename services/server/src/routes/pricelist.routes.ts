@@ -1,18 +1,15 @@
 import { Router } from 'express';
-import { ProductController } from '../controllers/product.controller';
+import { PricelistController } from '../controllers/pricelist.controller';
 import { authMiddleware } from '../middleware/auth.middleware';
 import { rbacMiddleware } from '../middleware/rbac.middleware';
 
 const router = Router();
-const controller = new ProductController();
+const controller = new PricelistController();
 
-// Public routes
 router.get('/', controller.getAll);
 router.get('/:id', controller.getById);
-
-// Admin only
 router.post('/', authMiddleware, rbacMiddleware(['admin']), controller.create);
 router.put('/:id', authMiddleware, rbacMiddleware(['admin']), controller.update);
 router.delete('/:id', authMiddleware, rbacMiddleware(['admin']), controller.delete);
 
-export { router as productRoutes };
+export { router as pricelistRoutes };

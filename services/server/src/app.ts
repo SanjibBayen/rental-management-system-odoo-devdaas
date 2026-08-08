@@ -1,32 +1,93 @@
 import express from 'express';
 import cors from 'cors';
+// import helmet from 'helmet';
+// import morgan from 'morgan';
 import { errorHandler } from './middleware/errorHandler.middleware';
-// import { authRoutes } from './routes/auth.routes';
-// import { productRoutes } from './routes/product.routes';
-// import { rentalRoutes } from './routes/rental.routes';
-// import db from './config/database'; // Uncomment when database config is ready
+import { initializeDatabase } from './db/init';
+import router from './routes';
+import { logger } from './utils/logger';
 
 const app = express();
 
-app.use(cors());
-app.use(express.json());
+// ============================================================
+// 1. Security & Utility Middleware
+// ============================================================
+
+// Secure HTTP headers
+// app.use(helmet());
+
+// Enable CORS
+app.use(cors({
+    origin: process.env.CLIENT_URL || '*',
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+// Parse JSON request bodies
+app.use(express.json({ limit: '10mb' }));
+
+// Parse URL-encoded request bodies
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// HTTP request logging
+// app.use(morgan('combined', {
+//     stream: {
+//         write: (message) => logger.info(message.trim())
+//     }
+// }));
 
 
-const DATABASECONNECTION= async () => {
-    try{
-        // await db.authenticate();
-        console.log('Database connected successfully');
+/**
+ * Initialize the PostgreSQL database and create tables if they don't exist.
+ * This runs once when the server starts.
+ */
+const initializeDatabaseConnection = async (): Promise<void> => {
+    try {
+        logger.info('Initializing PostgreSQL database...');
+        await initializeDatabase();
+        logger.info('PostgreSQL database connected and initialized successfully');
     } catch (error) {
-        console.error('Failed to connect to database:', error);
+        logger.error('Failed to connect to PostgreSQL database:', error);
         process.exit(1);
     }
+};
 
-}
+// Run database initialization
+initializeDatabaseConnection();
 
-// app.use('/api/auth', authRoutes);
-// app.use('/api/products', productRoutes);
-// app.use('/api/rentals', rentalRoutes);
+// ============================================================
+// 3. API Routes
+// ============================================================
+
+// Health check endpoint (public)
+app.get('/health', (req, res) => {
+    res.status(200).json({
+        status: 'healthy',
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime()
+    });
+});
+
+// Register all routes under /api
+app.use('/api', router);
+
+// 404 handler for unknown routes
+app.use('*', (req, res) => {
+    res.status(404).json({
+        success: false,
+        message: `Route ${req.originalUrl} not found`
+    });
+});
+
+// ============================================================
+// 4. Global Error Handler
+// ============================================================
 
 app.use(errorHandler);
+
+// ============================================================
+// 5. Export the app
+// ============================================================
 
 export default app;
