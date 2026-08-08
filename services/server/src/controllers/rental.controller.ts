@@ -95,4 +95,33 @@ export class RentalController {
       res.status(500).json({ error: error.message });
     }
   }
+
+
+  async getInvoice(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+
+      // Fetch invoice details
+      const invoice = await rentalService.getInvoiceById(id);
+
+      if (!invoice) {
+        return res.status(404).json({ error: 'Invoice not found' });
+      }
+
+      // Return invoice data 
+      res.json({ data: invoice });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+
+  async getStats(req: Request, res: Response) {
+    try {
+      const stats = await rentalService.getDashboardStats();
+      res.json({ data: stats });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  }
 }

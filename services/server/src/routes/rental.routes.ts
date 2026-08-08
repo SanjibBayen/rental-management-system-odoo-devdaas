@@ -13,9 +13,12 @@ router.put('/:id/return', authMiddleware, controller.returnRental);
 
 // Customer only
 router.get('/user', authMiddleware, rbacMiddleware(['customer']), controller.getByUser);
+router.get('/:id/invoice', authMiddleware, controller.getInvoice);
+
 
 // Admin only
 router.get('/active', authMiddleware, rbacMiddleware(['admin']), controller.getActive);
 router.get('/overdue', authMiddleware, rbacMiddleware(['admin']), controller.getOverdue);
+router.get('/stats', authMiddleware, rbacMiddleware(['admin']), controller.getStats);
 
 export { router as rentalRoutes };

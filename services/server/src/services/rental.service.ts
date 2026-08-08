@@ -210,4 +210,21 @@ export class RentalService {
 
     return stats;
   }
+
+  async getInvoiceById(id: string) {
+    const invoice = await queryOne(`
+      SELECT r.*, 
+             p.name as product_name, 
+             p.daily_rate, 
+             u.full_name as customer_name, 
+             u.email as customer_email
+      FROM rentals r
+      JOIN products p ON r.product_id = p.id
+      JOIN user_profiles u ON r.user_id = u.id
+      WHERE r.id = $1
+    `, [id]);
+    return invoice;
+  }
+  
+
 }
