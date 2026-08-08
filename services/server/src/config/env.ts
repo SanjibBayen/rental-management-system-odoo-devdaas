@@ -50,6 +50,8 @@ const envSchema = z.object({
   EMAIL_USER: z.string().min(1),
   EMAIL_PASS: z.string().min(1),
   EMAIL_FROM: z.string().email().default('noreply@rental.com'),
+  WEB_NAME: z.string().default('Rental Management System'),
+  WEB_URL: z.string().url().default('http://localhost:3000'),
 
   // CORS
   CLIENT_URL: z.string().url().default('http://localhost:3000'),
@@ -96,5 +98,9 @@ export const config = {
   rateLimit: {
     max: env.RATE_LIMIT_MAX,
     window: env.RATE_LIMIT_WINDOW,
+  },
+  web: {
+    name: env.WEB_NAME,
+    url: env.WEB_URL,
   },
 };

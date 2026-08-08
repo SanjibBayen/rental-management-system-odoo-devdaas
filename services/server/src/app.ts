@@ -1,5 +1,5 @@
 import express from 'express';
-import cors from 'cors';
+// import cors from 'cors';
 // import helmet from 'helmet';
 // import morgan from 'morgan';
 import { errorHandler } from './middleware/errorHandler.middleware';
@@ -9,20 +9,16 @@ import { logger } from './utils/logger';
 
 const app = express();
 
-// ============================================================
-// 1. Security & Utility Middleware
-// ============================================================
-
 // Secure HTTP headers
 // app.use(helmet());
 
 // Enable CORS
-app.use(cors({
-    origin: process.env.CLIENT_URL || '*',
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
-}));
+// app.use(cors({
+//     origin: process.env.CLIENT_URL || '*',
+//     credentials: true,
+//     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+//     allowedHeaders: ['Content-Type', 'Authorization']
+// }));
 
 // Parse JSON request bodies
 app.use(express.json({ limit: '10mb' }));
@@ -38,10 +34,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // }));
 
 
-/**
- * Initialize the PostgreSQL database and create tables if they don't exist.
- * This runs once when the server starts.
- */
+
 const initializeDatabaseConnection = async (): Promise<void> => {
     try {
         logger.info('Initializing PostgreSQL database...');
@@ -56,9 +49,6 @@ const initializeDatabaseConnection = async (): Promise<void> => {
 // Run database initialization
 initializeDatabaseConnection();
 
-// ============================================================
-// 3. API Routes
-// ============================================================
 
 // Health check endpoint (public)
 app.get('/health', (req, res) => {
@@ -70,7 +60,7 @@ app.get('/health', (req, res) => {
 });
 
 // Register all routes under /api
-app.use('/api', router);
+app.use('/api/v1', router);
 
 // 404 handler for unknown routes
 app.use('*', (req, res) => {
@@ -80,14 +70,7 @@ app.use('*', (req, res) => {
     });
 });
 
-// ============================================================
-// 4. Global Error Handler
-// ============================================================
 
 app.use(errorHandler);
-
-// ============================================================
-// 5. Export the app
-// ============================================================
 
 export default app;
