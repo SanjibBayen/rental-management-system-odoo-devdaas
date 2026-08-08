@@ -1,28 +1,29 @@
-import { supabase } from '../config/database';
-import { BaseService } from './base.service';
+import { BaseRepository } from '../repositories/base.repository';
 
-export class ProductService extends BaseService {
+export class ProductService {
+  private repo: BaseRepository;
+
   constructor() {
-    super('products');
+    this.repo = new BaseRepository('products');
   }
 
-  async getAvailableProducts() {
-    const { data, error } = await supabase
-      .from('products')
-      .select('*')
-      .eq('is_active', true)
-      .gt('available_quantity', 0);
-    if (error) throw error;
-    return data;
+  async getAll() {
+    return this.repo.findAll();
   }
 
-  async findByCategory(category: string) {
-    const { data, error } = await supabase
-      .from('products')
-      .select('*')
-      .eq('category', category)
-      .eq('is_active', true);
-    if (error) throw error;
-    return data;
+  async getById(id: string) {
+    return this.repo.findById(id);
+  }
+
+  async create(data: any) {
+    return this.repo.create(data);
+  }
+
+  async update(id: string, data: any) {
+    return this.repo.update(id, data);
+  }
+
+  async delete(id: string) {
+    await this.repo.delete(id);
   }
 }
