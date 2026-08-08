@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowRight, ShieldCheck, Clock, PenTool } from 'lucide-react';
+import { ArrowRight, ShieldCheck, Clock, PenTool, Star, Zap } from 'lucide-react';
 import { products } from '../../data';
 import ProductCard from '../../components/ProductCard';
 
@@ -9,69 +9,93 @@ export default function Home({ setActiveView, setSelectedProductId }: { setActiv
   return (
     <div className="w-full">
       {/* Hero Section */}
-      <section className="bg-primary text-white py-20 px-margin-desktop">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-12">
-          <div className="flex-1 space-y-6">
-            <h1 className="text-5xl font-black leading-tight tracking-tight">Professional Gear, Ready When You Are.</h1>
-            <p className="text-xl text-primary-container font-medium max-w-lg">
+      <section className="relative bg-[#0F172A] text-white py-24 px-margin-desktop overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/40 to-transparent pointer-events-none"></div>
+        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-16 relative z-10">
+          <div className="flex-1 space-y-8 text-center lg:text-left">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/20 text-sm font-bold backdrop-blur-sm">
+              <Zap className="w-4 h-4 text-warning-amber" /> Supercharge your workflow
+            </div>
+            <h1 className="text-5xl lg:text-7xl font-black leading-[1.1] tracking-tight">
+              Premium Gear.<br/>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-primary">Ready to Work.</span>
+            </h1>
+            <p className="text-xl text-slate-300 font-medium max-w-xl mx-auto lg:mx-0 leading-relaxed">
               RentFlow provides top-tier enterprise equipment for construction, audio-visual, and specialized industries with same-day delivery.
             </p>
-            <div className="flex gap-4 pt-4">
+            <div className="flex flex-col sm:flex-row gap-4 pt-4 justify-center lg:justify-start">
               <button 
                 onClick={() => setActiveView('catalog')}
-                className="bg-white text-primary font-bold px-8 py-3 rounded-lg hover:bg-surface-muted transition-colors flex items-center gap-2"
+                className="bg-primary text-white font-bold px-8 py-4 rounded-xl hover:bg-opacity-90 transition-all shadow-lg hover:shadow-primary/25 hover:-translate-y-0.5 flex items-center justify-center gap-2 text-lg"
               >
                 Browse Catalog <ArrowRight className="w-5 h-5" />
               </button>
             </div>
           </div>
-          <div className="flex-1 hidden md:block">
-            <div className="relative rounded-2xl overflow-hidden shadow-2xl border-4 border-white/10 aspect-video bg-surface-muted">
-              <img src="https://images.unsplash.com/photo-1541888087616-20092bc3ffc6?auto=format&fit=crop&w=1200&q=80" alt="Construction Equipment" className="w-full h-full object-cover" />
+          <div className="flex-1 hidden md:block w-full">
+            <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-white/10 aspect-video lg:aspect-square bg-surface-muted max-w-lg ml-auto group">
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A] via-transparent to-transparent z-10 opacity-60"></div>
+              <img 
+                src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&q=80&w=1200" 
+                alt="Professional Equipment" 
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
+              />
+              <div className="absolute bottom-6 left-6 right-6 z-20 flex gap-4">
+                <div className="bg-white/10 backdrop-blur-md border border-white/20 p-4 rounded-xl flex-1">
+                  <div className="text-warning-amber flex gap-1 mb-1">
+                    <Star className="w-4 h-4 fill-current" /><Star className="w-4 h-4 fill-current" /><Star className="w-4 h-4 fill-current" /><Star className="w-4 h-4 fill-current" /><Star className="w-4 h-4 fill-current" />
+                  </div>
+                  <div className="font-bold text-sm">"Flawless gear, arrived in 2 hours."</div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
       {/* Features */}
-      <section className="bg-surface-muted py-16 px-margin-desktop border-b border-border-standard">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="bg-white p-6 rounded-xl border border-border-standard flex items-start gap-4">
-            <div className="bg-primary/10 p-3 rounded-lg text-primary"><ShieldCheck className="w-6 h-6" /></div>
-            <div>
-              <h3 className="font-bold text-lg mb-1">Quality Assured</h3>
-              <p className="text-on-surface-variant text-sm">Every item is rigorously inspected and serviced before every rental.</p>
-            </div>
+      <section className="bg-surface-muted py-20 px-margin-desktop border-b border-border-standard">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-black text-on-surface">Why Professionals Choose RentFlow</h2>
+            <p className="text-on-surface-variant mt-3 font-medium text-lg">Enterprise-grade reliability at your fingertips.</p>
           </div>
-          <div className="bg-white p-6 rounded-xl border border-border-standard flex items-start gap-4">
-            <div className="bg-primary/10 p-3 rounded-lg text-primary"><Clock className="w-6 h-6" /></div>
-            <div>
-              <h3 className="font-bold text-lg mb-1">Fast Delivery</h3>
-              <p className="text-on-surface-variant text-sm">Same-day delivery available for premium members in select locations.</p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="bg-white p-8 rounded-2xl border border-border-standard shadow-sm hover:shadow-md transition-shadow">
+              <div className="bg-primary/10 w-14 h-14 flex items-center justify-center rounded-xl text-primary mb-6"><ShieldCheck className="w-7 h-7" /></div>
+              <h3 className="font-bold text-xl mb-3 text-on-surface">Quality Assured</h3>
+              <p className="text-on-surface-variant font-medium leading-relaxed">Every item is rigorously inspected, cleaned, and serviced before every rental to ensure zero downtime on your projects.</p>
             </div>
-          </div>
-          <div className="bg-white p-6 rounded-xl border border-border-standard flex items-start gap-4">
-            <div className="bg-primary/10 p-3 rounded-lg text-primary"><PenTool className="w-6 h-6" /></div>
-            <div>
-              <h3 className="font-bold text-lg mb-1">Odoo Integrated</h3>
-              <p className="text-on-surface-variant text-sm">Seamlessly syncing your inventory, invoicing, and fleet routing.</p>
+            <div className="bg-white p-8 rounded-2xl border border-border-standard shadow-sm hover:shadow-md transition-shadow">
+              <div className="bg-primary/10 w-14 h-14 flex items-center justify-center rounded-xl text-primary mb-6"><Clock className="w-7 h-7" /></div>
+              <h3 className="font-bold text-xl mb-3 text-on-surface">Fast Delivery</h3>
+              <p className="text-on-surface-variant font-medium leading-relaxed">Same-day delivery available for premium members in select locations. Get your gear precisely when you need it.</p>
+            </div>
+            <div className="bg-white p-8 rounded-2xl border border-border-standard shadow-sm hover:shadow-md transition-shadow">
+              <div className="bg-primary/10 w-14 h-14 flex items-center justify-center rounded-xl text-primary mb-6"><PenTool className="w-7 h-7" /></div>
+              <h3 className="font-bold text-xl mb-3 text-on-surface">Odoo Integrated</h3>
+              <p className="text-on-surface-variant font-medium leading-relaxed">Seamlessly syncs your inventory, invoicing, and fleet routing directly with your existing Odoo workspace.</p>
             </div>
           </div>
         </div>
       </section>
 
       {/* Featured Products */}
-      <section className="py-16 px-margin-desktop max-w-7xl mx-auto">
-        <div className="flex justify-between items-end mb-8">
+      <section className="py-20 px-margin-desktop max-w-7xl mx-auto">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-10 gap-4">
           <div>
             <h2 className="text-3xl font-black text-on-surface">Featured Equipment</h2>
-            <p className="text-on-surface-variant mt-2 font-medium">Top picks for your next project.</p>
+            <p className="text-on-surface-variant mt-2 font-medium text-lg">Top picks for your next project, highly rated by experts.</p>
           </div>
-          <button onClick={() => setActiveView('catalog')} className="text-primary font-bold hover:underline flex items-center gap-1">
-            View All <ArrowRight className="w-4 h-4" />
+          <button 
+            onClick={() => setActiveView('catalog')} 
+            className="text-primary font-bold hover:bg-primary/5 px-4 py-2 rounded-lg transition-colors flex items-center gap-2"
+          >
+            View All Catalog <ArrowRight className="w-4 h-4" />
           </button>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {featured.map(product => (
             <div key={product.id} onClick={() => { setSelectedProductId(product.id); setActiveView('product_detail'); }} className="cursor-pointer h-full">
               <ProductCard product={product} setActiveView={setActiveView} />
@@ -80,5 +104,5 @@ export default function Home({ setActiveView, setSelectedProductId }: { setActiv
         </div>
       </section>
     </div>
-  );
+  );  
 }
