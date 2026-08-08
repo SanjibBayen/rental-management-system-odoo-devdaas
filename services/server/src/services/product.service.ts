@@ -1,7 +1,6 @@
 import { supabase } from '../config/database';
 import { BaseService } from './base.service';
 
-
 export class ProductService extends BaseService {
   constructor() {
     super('products');
@@ -13,6 +12,16 @@ export class ProductService extends BaseService {
       .select('*')
       .eq('is_active', true)
       .gt('available_quantity', 0);
+    if (error) throw error;
+    return data;
+  }
+
+  async findByCategory(category: string) {
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .eq('category', category)
+      .eq('is_active', true);
     if (error) throw error;
     return data;
   }
