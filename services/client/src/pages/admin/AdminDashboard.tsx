@@ -4,8 +4,11 @@ export default function AdminDashboard() {
   return (
     <main className="flex-1 max-w-7xl mx-auto w-full px-margin-desktop py-8">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-black text-primary">Admin Dashboard</h1>
-        <button className="bg-primary text-white px-6 py-2 rounded-lg font-bold hover:bg-opacity-90 transition-opacity shadow-sm">
+        <h1 className="text-3xl font-black text-on-surface">Admin Dashboard</h1>
+        <button 
+          onClick={() => alert("Redirecting to New Rental Draft...")}
+          className="bg-primary text-white px-6 py-2 rounded-lg font-bold hover:bg-opacity-90 transition-opacity shadow-sm"
+        >
           + New Rental
         </button>
       </div>
@@ -21,7 +24,6 @@ export default function AdminDashboard() {
           <div className="text-3xl font-black text-on-surface">84</div>
           <div className="text-success-teal text-sm font-semibold mt-2">+12% from last month</div>
         </div>
-
         <div className="bg-white p-6 rounded-xl border border-border-standard shadow-sm">
           <div className="flex justify-between items-start mb-4">
             <h3 className="text-outline font-semibold text-sm">Due Today</h3>
@@ -32,7 +34,6 @@ export default function AdminDashboard() {
           <div className="text-3xl font-black text-on-surface">7</div>
           <div className="text-danger-red text-sm font-semibold mt-2">2 Overdue</div>
         </div>
-
         <div className="bg-white p-6 rounded-xl border border-border-standard shadow-sm">
           <div className="flex justify-between items-start mb-4">
             <h3 className="text-outline font-semibold text-sm">Revenue</h3>
@@ -43,7 +44,6 @@ export default function AdminDashboard() {
           <div className="text-3xl font-black text-on-surface">₹14.2K</div>
           <div className="text-success-teal text-sm font-semibold mt-2">+8% from last month</div>
         </div>
-
         <div className="bg-white p-6 rounded-xl border border-border-standard shadow-sm">
           <div className="flex justify-between items-start mb-4">
             <h3 className="text-outline font-semibold text-sm">Customers</h3>
@@ -59,10 +59,11 @@ export default function AdminDashboard() {
       <div className="bg-white rounded-xl border border-border-standard shadow-sm overflow-hidden">
         <div className="px-6 py-4 border-b border-border-standard flex justify-between items-center bg-surface-muted">
           <h2 className="font-bold text-lg text-on-surface">Recent Rentals</h2>
-          <button className="text-primary font-bold text-sm flex items-center gap-1 hover:underline">
+          <button onClick={() => alert("Viewing all rentals...")} className="text-primary font-bold text-sm flex items-center gap-1 hover:underline">
             View All <ArrowRight className="w-4 h-4" />
           </button>
         </div>
+        
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
@@ -102,4 +103,4 @@ export default function AdminDashboard() {
       </div>
     </main>
   );
-} 
+}
