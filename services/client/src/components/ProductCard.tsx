@@ -68,14 +68,14 @@ export default function ProductCard({ product, setActiveView }: ProductCardProps
           </div>
           <div className="flex gap-2">
             <button 
-              onClick={() => addToCart(product)}
+              onClick={(e) => { e.stopPropagation(); addToCart(product); }}
               className="bg-surface-muted text-primary border border-primary/20 font-bold p-2 rounded-lg hover:bg-primary/10 transition-colors shadow-sm cursor-pointer"
               title="Add to Cart"
             >
               <ShoppingCart className="w-5 h-5" />
             </button>
             <button 
-              onClick={handleRentNow}
+              onClick={(e) => { e.stopPropagation(); handleRentNow(); }}
               className="bg-primary text-white font-bold text-xs px-4 py-2 rounded-lg hover:bg-opacity-90 transition-opacity shadow-sm cursor-pointer"
             >
               Rent Now
@@ -86,3 +86,4 @@ export default function ProductCard({ product, setActiveView }: ProductCardProps
     </div>
   );
 }
+   
