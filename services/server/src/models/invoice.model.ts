@@ -24,7 +24,7 @@ export const InvoiceSchema = z.object({
   due_date: z.string().date(),
   subtotal: z.number().positive(),
   tax: z.number().min(0).default(0),
-  discount: z.number().min(0).default(0),
+  discount: z.number().min(0).default(0), 
   total: z.number().positive(),
   status: z.enum(['draft', 'sent', 'paid', 'overdue', 'cancelled']).default('draft'),
   notes: z.string().optional(),

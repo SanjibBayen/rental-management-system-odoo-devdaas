@@ -1,5 +1,5 @@
-// import { Request, Response, NextFunction } from 'express';
-// // import { AuthRequest } from './auth.middleware';
+// import { Response, NextFunction } from 'express';
+// import { AuthRequest } from './auth.middleware';
 
 // export const rbacMiddleware = (allowedRoles: ('admin' | 'customer' | 'delivery')[]) => {
 //   return (req: AuthRequest, res: Response, next: NextFunction) => {
@@ -12,8 +12,8 @@
 //     const userRole = user.user_metadata?.role || 'customer';
 
 //     if (!allowedRoles.includes(userRole)) {
-//       return res.status(403).json({ 
-//         error: `Access denied. Required roles: ${allowedRoles.join(', ')}` 
+//       return res.status(403).json({
+//         error: `Access denied. Required roles: ${allowedRoles.join(', ')}`,
 //       });
 //     }
 
