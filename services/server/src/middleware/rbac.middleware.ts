@@ -1,5 +1,5 @@
 // import { Request, Response, NextFunction } from 'express';
-// import { AuthRequest } from './auth.middleware';
+// // import { AuthRequest } from './auth.middleware';
 
 // export const rbacMiddleware = (allowedRoles: ('admin' | 'customer' | 'delivery')[]) => {
 //   return (req: AuthRequest, res: Response, next: NextFunction) => {

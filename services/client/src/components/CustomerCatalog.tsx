@@ -1,10 +1,10 @@
-import Sidebar from '../../components/Sidebar';
-import CatalogHeader from '../../components/CatalogHeader';
-import ProductCard from '../../components/ProductCard';
-import Pagination from '../../components/Pagination';
-import { products } from '../../data';
+import Sidebar from './Sidebar';
+import CatalogHeader from './CatalogHeader';
+import ProductCard from './ProductCard';
+import Pagination from './Pagination';
+import { products } from '../data';
 
-export default function CustomerCatalog({ setActiveView }: { setActiveView: (view: string) => void }) {
+export default function CustomerCatalog({ setActiveView }: { setActiveView?: (view: string) => void }) {
   return (
     <main className="flex-1 max-w-7xl mx-auto w-full px-margin-desktop py-8 grid grid-cols-1 lg:grid-cols-4 gap-8">
       <Sidebar />
