@@ -25,12 +25,8 @@
   "devDependencies": {
     "@types/express": "^4.17.21",
     "@types/node": "^22.14.0",
-<<<<<<< HEAD
-    "@types/react-dom": "^19.2.4",
-=======
     "@types/react": "^19.2.18",
-    "@types/react-dom": "^19.2.0",
->>>>>>> 3ccac572ec3c6fca9002d64fb6bc027737222042
+    "@types/react-dom": "^19.2.4",
     "autoprefixer": "^10.4.21",
     "esbuild": "^0.25.0",
     "tailwindcss": "^4.1.14",
