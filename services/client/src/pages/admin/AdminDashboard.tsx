@@ -14,55 +14,63 @@ export default function AdminDashboard() {
   return (
     <main className="flex-1 max-w-7xl mx-auto w-full px-margin-desktop py-8">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-black text-on-surface tracking-tight">Admin Dashboard</h1>
+        <h1 className="text-2xl font-bold text-on-surface tracking-tight">Admin Dashboard</h1>
         <button 
           onClick={() => setIsNewRentalModalOpen(true)}
-          className="bg-primary text-white px-6 py-2 rounded-lg font-bold hover:bg-opacity-90 transition-opacity shadow-sm"
+          className="bg-primary text-white px-5 py-2.5 rounded-lg font-bold text-sm hover:bg-opacity-90 transition-all shadow-sm active:scale-95"
         >
           + New Rental
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div className="bg-white p-6 rounded-xl border border-border-standard shadow-sm">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="bg-white p-6 rounded-xl border border-border-standard shadow-sm hover:shadow-md transition-shadow group">
           <div className="flex justify-between items-start mb-4">
-            <h3 className="text-outline font-semibold text-sm">Active Rentals</h3>
-            <div className="p-2 bg-primary/10 rounded-lg text-primary">
+            <h3 className="text-on-surface-variant font-medium text-sm uppercase tracking-wider">Active Rentals</h3>
+            <div className="p-2.5 bg-primary/10 rounded-lg text-primary group-hover:bg-primary group-hover:text-white transition-colors">
               <Package className="w-5 h-5" />
             </div>
           </div>
-          <div className="text-3xl font-black text-on-surface">84</div>
-          <div className="text-success-teal text-sm font-semibold mt-2">+12% from last month</div>
+          <div className="text-3xl font-bold text-on-surface">84</div>
+          <div className="text-success-teal text-sm font-medium mt-2 flex items-center gap-1">
+            <span className="font-bold">+12%</span> from last month
+          </div>
         </div>
-        <div className="bg-white p-6 rounded-xl border border-border-standard shadow-sm">
+        <div className="bg-white p-6 rounded-xl border border-border-standard shadow-sm hover:shadow-md transition-shadow group">
           <div className="flex justify-between items-start mb-4">
-            <h3 className="text-outline font-semibold text-sm">Due Today</h3>
-            <div className="p-2 bg-warning-amber/10 rounded-lg text-warning-amber">
+            <h3 className="text-on-surface-variant font-medium text-sm uppercase tracking-wider">Due Today</h3>
+            <div className="p-2.5 bg-warning-amber/10 rounded-lg text-warning-amber group-hover:bg-warning-amber group-hover:text-white transition-colors">
               <Clock className="w-5 h-5" />
             </div>
           </div>
-          <div className="text-3xl font-black text-on-surface">7</div>
-          <div className="text-danger-red text-sm font-semibold mt-2">2 Overdue</div>
+          <div className="text-3xl font-bold text-on-surface">7</div>
+          <div className="text-danger-red text-sm font-medium mt-2 flex items-center gap-1">
+            <span className="font-bold">2 Overdue</span> action required
+          </div>
         </div>
-        <div className="bg-white p-6 rounded-xl border border-border-standard shadow-sm">
+        <div className="bg-white p-6 rounded-xl border border-border-standard shadow-sm hover:shadow-md transition-shadow group">
           <div className="flex justify-between items-start mb-4">
-            <h3 className="text-outline font-semibold text-sm">Revenue</h3>
-            <div className="p-2 bg-success-teal/10 rounded-lg text-success-teal">
+            <h3 className="text-on-surface-variant font-medium text-sm uppercase tracking-wider">Revenue</h3>
+            <div className="p-2.5 bg-success-teal/10 rounded-lg text-success-teal group-hover:bg-success-teal group-hover:text-white transition-colors">
               <DollarSign className="w-5 h-5" />
             </div>
           </div>
-          <div className="text-3xl font-black text-on-surface">₹14.2K</div>
-          <div className="text-success-teal text-sm font-semibold mt-2">+8% from last month</div>
+          <div className="text-3xl font-bold text-on-surface">₹14.2K</div>
+          <div className="text-success-teal text-sm font-medium mt-2 flex items-center gap-1">
+            <span className="font-bold">+8%</span> from last month
+          </div>
         </div>
-        <div className="bg-white p-6 rounded-xl border border-border-standard shadow-sm">
+        <div className="bg-white p-6 rounded-xl border border-border-standard shadow-sm hover:shadow-md transition-shadow group">
           <div className="flex justify-between items-start mb-4">
-            <h3 className="text-outline font-semibold text-sm">Customers</h3>
-            <div className="p-2 bg-info-blue/10 rounded-lg text-info-blue">
+            <h3 className="text-on-surface-variant font-medium text-sm uppercase tracking-wider">Customers</h3>
+            <div className="p-2.5 bg-info-blue/10 rounded-lg text-info-blue group-hover:bg-info-blue group-hover:text-white transition-colors">
               <Users className="w-5 h-5" />
             </div>
           </div>
-          <div className="text-3xl font-black text-on-surface">1,204</div>
-          <div className="text-success-teal text-sm font-semibold mt-2">+24 new this week</div>
+          <div className="text-3xl font-bold text-on-surface">1,204</div>
+          <div className="text-success-teal text-sm font-medium mt-2 flex items-center gap-1">
+            <span className="font-bold">+4</span> new this week
+          </div>
         </div>
       </div>
 

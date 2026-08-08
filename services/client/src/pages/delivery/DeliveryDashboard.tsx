@@ -44,8 +44,8 @@ export default function DeliveryDashboard() {
       )}
 
       <div className="mb-8">
-        <h1 className="text-3xl font-black text-on-surface mb-2">Delivery Routes</h1>
-        <p className="text-on-surface-variant font-medium">Today's Assignments</p>
+        <h1 className="text-2xl font-bold text-on-surface mb-2">Delivery Routes</h1>
+        <p className="text-on-surface-variant font-medium text-sm">Today's Assignments</p>
       </div>
       
       <div className="flex gap-4 mb-8">
