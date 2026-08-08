@@ -25,7 +25,7 @@ export default function Customers() {
               <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xl">
                 {customer.name.charAt(0)}
               </div>
-              <button className="text-on-surface-variant hover:text-primary transition-colors">
+              <button onClick={() => alert("View Customer Profile")} className="text-on-surface-variant hover:text-primary transition-colors">
                 <ExternalLink className="w-5 h-5" />
               </button>
             </div>
