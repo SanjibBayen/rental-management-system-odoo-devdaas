@@ -140,7 +140,7 @@ export default function Navbar({ activeView, setActiveView }: NavbarProps) {
             )}
 
             <div 
-              className="flex items-center gap-2 cursor-pointer group hidden sm:flex"
+              className="flex items-center gap-2 cursor-pointer group sm:flex"
               onClick={() => setActiveView('profile')}
             >
               <UserCircle className="w-8 h-8 text-on-surface-variant group-hover:text-primary transition-colors" />

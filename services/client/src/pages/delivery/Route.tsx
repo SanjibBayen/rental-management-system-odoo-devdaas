@@ -42,7 +42,7 @@ export default function Route() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Map View */}
-        <div className="lg:col-span-2 bg-surface-container-highest rounded-2xl min-h-[500px] flex items-center justify-center border border-border-standard relative overflow-hidden shadow-inner">
+        <div className="lg:col-span-2 bg-surface-container-highest rounded-2xl min-h-125 flex items-center justify-center border border-border-standard relative overflow-hidden shadow-inner">
           <div className="absolute inset-0 bg-surface-muted bg-cover bg-center opacity-50" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=1200&q=80')" }}></div>
           <div className="z-10 bg-white/95 backdrop-blur-md p-8 rounded-2xl shadow-xl border border-border-standard text-center max-w-sm">
             <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -56,7 +56,7 @@ export default function Route() {
         </div>
 
         {/* Schedule list */}
-        <div className="bg-white rounded-2xl shadow-sm border border-border-standard p-6 h-fit max-h-[600px] overflow-y-auto">
+        <div className="bg-white rounded-2xl shadow-sm border border-border-standard p-6 h-fit max-h-150 overflow-y-auto">
           <h2 className="text-xl font-black text-on-surface mb-6 border-b border-border-standard pb-4">Stops Schedule</h2>
           
           <div className="space-y-4">

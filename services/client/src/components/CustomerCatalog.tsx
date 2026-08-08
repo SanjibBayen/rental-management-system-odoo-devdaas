@@ -1,8 +1,9 @@
-import Sidebar from '../../components/Sidebar';
-import CatalogHeader from '../../components/CatalogHeader';
-import ProductCard from '../../components/ProductCard';
-import Pagination from '../../components/Pagination';
-import { products } from '../../data';
+import Sidebar from './Sidebar';
+import CatalogHeader from './CatalogHeader';
+import ProductCard from './ProductCard';
+import Pagination from './Pagination';
+import { products } from '../data';
+import { Product } from '../types';
 
 export default function CustomerCatalog({ setActiveView, setSelectedProductId }: { setActiveView: (view: string) => void, setSelectedProductId: (id: string) => void }) {
   return (
@@ -11,7 +12,7 @@ export default function CustomerCatalog({ setActiveView, setSelectedProductId }:
       <section className="col-span-1 lg:col-span-3 flex flex-col gap-6">
         <CatalogHeader />
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {products.map((product) => (
+          {products.map((product: Product) => (
             <div key={product.id} onClick={() => { setSelectedProductId(product.id); setActiveView('product_detail'); }} className="cursor-pointer">
               <ProductCard product={product} setActiveView={setActiveView} />
             </div>

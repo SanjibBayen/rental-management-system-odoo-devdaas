@@ -10,7 +10,7 @@ export default function Home({ setActiveView, setSelectedProductId }: { setActiv
     <div className="w-full">
       {/* Hero Section */}
       <section className="relative bg-[#0F172A] text-white py-24 px-margin-desktop overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/40 to-transparent pointer-events-none"></div>
+        <div className="absolute inset-0 bg-linear-to-br from-primary/40 to-transparent pointer-events-none"></div>
         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-16 relative z-10">
           <div className="flex-1 space-y-8 text-center lg:text-left">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/20 text-sm font-bold backdrop-blur-sm">
@@ -18,7 +18,7 @@ export default function Home({ setActiveView, setSelectedProductId }: { setActiv
             </div>
             <h1 className="text-5xl lg:text-7xl font-black leading-[1.1] tracking-tight">
               Premium Gear.<br/>
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-primary">Ready to Work.</span>
+              <span className="text-transparent bg-clip-text bg-linear-to-r from-blue-400 to-primary">Ready to Work.</span>
             </h1>
             <p className="text-xl text-slate-300 font-medium max-w-xl mx-auto lg:mx-0 leading-relaxed">
               RentFlow provides top-tier enterprise equipment for construction, audio-visual, and specialized industries with same-day delivery.
@@ -34,7 +34,7 @@ export default function Home({ setActiveView, setSelectedProductId }: { setActiv
           </div>
           <div className="flex-1 hidden md:block w-full">
             <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-white/10 aspect-video lg:aspect-square bg-surface-muted max-w-lg ml-auto group">
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A] via-transparent to-transparent z-10 opacity-60"></div>
+              <div className="absolute inset-0 bg-linear-to-t from-[#0F172A] via-transparent to-transparent z-10 opacity-60"></div>
               <img 
                 src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&q=80&w=1200" 
                 alt="Professional Equipment" 
