@@ -1,26 +1,18 @@
 import express from 'express';
 import cors from 'cors';
-import { config } from './config/env';
 import { errorHandler } from './middleware/errorHandler.middleware';
+// import { authRoutes } from './routes/auth.routes';
+// import { productRoutes } from './routes/product.routes';
+// import { rentalRoutes } from './routes/rental.routes';
 
 const app = express();
 
-app.use(
-  cors({
-    origin: config.cors.clientUrl ?? '*',
-    credentials: true,
-  })
-);
+app.use(cors());
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
-app.get('/health', (_req, res) => {
-  res.status(200).json({ status: 'OK', timestamp: new Date().toISOString() });
-});
-
-app.use('*', (_req, res) => {
-  res.status(404).json({ error: 'Route not found' });
-});
+// app.use('/api/auth', authRoutes);
+// app.use('/api/products', productRoutes);
+// app.use('/api/rentals', rentalRoutes);
 
 app.use(errorHandler);
 
