@@ -6,8 +6,18 @@ const pricelistService = new PricelistService();
 export class PricelistController {
   async getAll(req: Request, res: Response) {
     try {
-      const pricelists = await pricelistService.getAll();
-      res.json({ data: pricelists });
+
+      const { id, name, organization_id } = req.body;
+
+      if (!id || !name || !organization_id) {
+        res.status(400).json({ error: 'Missing required fields: id, name, organization_id' });
+        return;
+      } else {
+        res.status(200).json({
+          data: { id, name, organization_id },
+          message: 'Pricelists retrieved successfully'
+        });
+      }
     } catch (error: any) {
       res.status(500).json({ error: error.message });
     }

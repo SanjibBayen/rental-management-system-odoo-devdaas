@@ -5,6 +5,7 @@ import {
   productVariantSchema, quotationSchema, rentalAssetSchema, rentalOrderSchema,
   rentalPeriodSchema, returnSchema, securityDepositSchema, userSchema,
 } from '../models';
+import { emailVerificationSchema } from '../models/emailVerification.model';
 
 /** Creates the rental domain tables in foreign-key dependency order. */
 export async function initializeDatabase() {
@@ -29,6 +30,7 @@ export async function initializeDatabase() {
     returnSchema,
     inspectionSchema,
     auditLogSchema,
+    emailVerificationSchema,
   ];
 
 
