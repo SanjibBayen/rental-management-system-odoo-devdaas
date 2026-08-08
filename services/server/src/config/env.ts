@@ -27,7 +27,7 @@ const envSchema = z.object({
     .default('true')
     .transform((val) => val === 'true'),
 
-  // Nodemailer (SMTP) - ✅ UPDATED TO SUPPORT SMTP_* NAMES
+  // Nodemailer (SMTP)
   SMTP_HOST: z.string().default('smtp.gmail.com'),
   SMTP_PORT: z.string().default('587').transform(Number),
   SMTP_SECURE: z
@@ -46,6 +46,11 @@ const envSchema = z.object({
   // Rate Limiting
   RATE_LIMIT_MAX: z.string().default('100').transform(Number),
   RATE_LIMIT_WINDOW: z.string().default('60000').transform(Number),
+
+CLOUDINARY_CLOUD_NAME: z.string().min(1),
+CLOUDINARY_API_KEY: z.string().min(1),
+CLOUDINARY_API_SECRET: z.string().min(1),
+
 });
 
 const env = envSchema.parse(process.env);
@@ -90,4 +95,10 @@ export const config = {
     name: env.WEB_NAME,
     url: env.WEB_URL,
   },
+  cloudinary: {
+  cloudName: env.CLOUDINARY_CLOUD_NAME,
+  apiKey: env.CLOUDINARY_API_KEY,
+  apiSecret: env.CLOUDINARY_API_SECRET,
+},
+  
 };

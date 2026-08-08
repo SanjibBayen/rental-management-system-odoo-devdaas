@@ -8,6 +8,8 @@ import { pickupRoutes } from './pickup.routes';
 import { returnRoutes } from './return.routes';
 import { quotationRoutes } from './quotation.routes';
 import { pricelistRoutes } from './pricelist.routes';
+import { uploadRoutes } from './upload.routes';
+
 
 const router = Router();
 
@@ -21,5 +23,5 @@ router.use('/pickups', pickupRoutes);
 router.use('/returns', returnRoutes);
 router.use('/quotations', quotationRoutes);
 router.use('/pricelists', pricelistRoutes);
-
+router.use('/upload', uploadRoutes);
 export default router;
