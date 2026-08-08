@@ -10,7 +10,7 @@ export default function Login() {
         {/* Left side branding */}
         <div className="bg-primary p-12 text-white flex flex-col justify-center">
           <div className="flex items-center gap-3 mb-8">
-            <div className="w-12 h-12 bg-white text-primary rounded-xl flex items-center justify-center text-2xl font-black">R</div>
+            {/* <div className="w-12 h-12 bg-white text-primary rounded-xl flex items-center justify-center text-2xl font-black"></div> */}
             <h1 className="text-4xl font-black tracking-tight">RentFlow</h1>
           </div>
           <p className="text-primary-container text-lg font-medium leading-relaxed">
