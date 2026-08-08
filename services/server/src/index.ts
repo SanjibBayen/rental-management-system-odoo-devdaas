@@ -1,9 +1,20 @@
 import app from './app';
-import { config } from './config/env';
+import dotenv from 'dotenv';
 import { redis } from './config/redis';
 import { logger } from './utils/logger';
+import db from './db/Database';
 
-const PORT = config.app.port;
+dotenv.config({ path: '.env' });
+
+const PORT = process.env.PORT || 3000;
+
+
+db().then(() => {
+  logger.info('Supabase connected successfully');
+}).catch((err) => {
+  logger.error('Failed to connect to Supabase:', err);
+  process.exit(1);
+});
 
 const startServer = async () => {
   try {
@@ -12,7 +23,7 @@ const startServer = async () => {
 
     app.listen(PORT, () => {
       logger.info(`Server running on port ${PORT}`);
-      logger.info(`Environment: ${config.app.nodeEnv}`);
+      logger.info(`Environment: ${process.env.NODE_ENV}`);
     });
   } catch (error) {
     logger.error('Failed to start server:', error);

@@ -1,5 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
-import { env } from '../config/env';
+import dotenv from 'dotenv';
+
+dotenv.config({ path: '.env' });
+
+const env = process.env;
 
 export class AppError extends Error {
   statusCode: number;
