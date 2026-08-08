@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 
 export type Role = 'admin' | 'customer' | 'delivery';
 
@@ -44,22 +44,41 @@ const MOCK_USERS: User[] = [
 
 interface AuthContextType {
   user: User | null;
-  login: (userId: string) => void;
+  login: (email: string) => void;
+  signup: (name: string, email: string) => void;
   logout: () => void;
   hasPermission: (permission: Permission) => boolean;
-  mockUsers: User[]; // Exposing for the UI to switch roles easily
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null); // Default to null to show login page
+  const [user, setUser] = useState<User | null>(null);
 
-  const login = (userId: string) => {
-    const foundUser = MOCK_USERS.find(u => u.id === userId);
+  const login = (email: string) => {
+    const foundUser = MOCK_USERS.find(u => u.email.toLowerCase() === email.toLowerCase());
     if (foundUser) {
       setUser(foundUser);
+    } else {
+      // Default fallback for any other email as a customer
+      setUser({
+        id: 'u_new_' + Math.random().toString(36).substr(2, 9),
+        name: email.split('@')[0],
+        email: email,
+        role: 'customer',
+        permissions: ['manage_own_rentals']
+      });
     }
+  };
+
+  const signup = (name: string, email: string) => {
+    setUser({
+      id: 'u_new_' + Math.random().toString(36).substr(2, 9),
+      name: name,
+      email: email,
+      role: 'customer',
+      permissions: ['manage_own_rentals']
+    });
   };
 
   const logout = () => {
@@ -72,7 +91,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, hasPermission, mockUsers: MOCK_USERS }}>
+    <AuthContext.Provider value={{ user, login, signup, logout, hasPermission }}>
       {children}
     </AuthContext.Provider>
   );
