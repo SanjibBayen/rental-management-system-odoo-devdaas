@@ -1,27 +1,10 @@
-import Redis, { RedisOptions } from 'ioredis';
+import Redis from 'ioredis';
 import { config } from './env';
-import { logger } from '../utils/logger';
 
-const options: RedisOptions = {
-  host: String(config.redis.host),
-  port: Number(config.redis.port),
-  password: config.redis.password ? String(config.redis.password) : undefined,
-  db: Number(config.redis.db),
-};
-
-if (config.redis.tlsEnabled) {
-  // provide an empty tls object to enable TLS in ioredis
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  options.tls = {};
-}
-
-const client = new Redis(options);
-
-client.on('connect', () => logger.info('Redis connecting...'));
-client.on('ready', () => logger.info('Redis ready'));
-client.on('error', (err) => logger.error('Redis error', err));
-client.on('close', () => logger.info('Redis connection closed'));
-
-export const redis = client;
-export default redis;
+export const redis = new Redis({
+  host: config.redis.host,
+  port: config.redis.port,
+  password: config.redis.password || undefined,
+  db: config.redis.db,
+  tls: config.redis.tlsEnabled ? { rejectUnauthorized: false } : undefined
+});
