@@ -1,5 +1,6 @@
 import { ShoppingCart, Search, Menu, UserCircle, LogOut } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
+import { useCart } from '../hooks/useCart';
 
 interface NavbarProps {
   activeView: string;
@@ -8,6 +9,7 @@ interface NavbarProps {
 
 export default function Navbar({ activeView, setActiveView }: NavbarProps) {
   const { user, logout } = useAuth();
+  const { totalItems } = useCart();
   const role = user?.role || 'customer';
 
   const NavItem = ({ viewId, label }: { viewId: string, label: string }) => (
@@ -24,7 +26,7 @@ export default function Navbar({ activeView, setActiveView }: NavbarProps) {
       <div className="flex justify-between items-center w-full max-w-7xl mx-auto px-margin-desktop py-3">
         {/* Brand */}
         <div className="flex items-center gap-2 text-2xl font-black tracking-tight text-primary cursor-pointer hover:opacity-90 transition-opacity">
-          {/* <div className="w-8 h-8 bg-primary rounded flex items-center justify-center text-white text-lg font-bold"></div> */}
+          <div className="w-8 h-8 bg-primary rounded flex items-center justify-center text-white text-lg font-bold">R</div>
           RentFlow
         </div>
         
@@ -64,11 +66,17 @@ export default function Navbar({ activeView, setActiveView }: NavbarProps) {
                 />
               </div>
               
-              <button aria-label="Cart" className="relative text-on-surface-variant hover:text-primary transition-colors">
+              <button 
+                aria-label="Cart" 
+                onClick={() => setActiveView('cart')}
+                className="relative text-on-surface-variant hover:text-primary transition-colors"
+              >
                 <ShoppingCart className="w-6 h-6" />
-                <span className="absolute -top-2 -right-2 bg-primary text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
-                  3
-                </span>
+                {totalItems > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-primary text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+                    {totalItems}
+                  </span>
+                )}
               </button>
             </>
           )}

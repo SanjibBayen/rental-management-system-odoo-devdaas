@@ -1,5 +1,6 @@
 {
   "devDependencies": {
+    "@types/react": "^19.2.18",
     "minimatch": "^10.2.6"
   },
   "dependencies": {

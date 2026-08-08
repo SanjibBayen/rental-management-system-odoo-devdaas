@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import CustomerCatalog from './pages/customer/CustomerCatalog';
 import MyRentals from './pages/customer/MyRentals';
+import Cart from './pages/customer/Cart';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import Inventory from './pages/admin/Inventory';
 import Customers from './pages/admin/Customers';
@@ -32,8 +33,9 @@ export default function App() {
     <>
       <Navbar activeView={activeView} setActiveView={setActiveView} />
       
-      {role === 'customer' && activeView === 'catalog' && <CustomerCatalog />}
+      {role === 'customer' && activeView === 'catalog' && <CustomerCatalog setActiveView={setActiveView} />}
       {role === 'customer' && activeView === 'rentals' && <MyRentals />}
+      {role === 'customer' && activeView === 'cart' && <Cart setActiveView={setActiveView} />}
       
       {role === 'admin' && activeView === 'dashboard' && <AdminDashboard />}
       {role === 'admin' && activeView === 'inventory' && <Inventory />}

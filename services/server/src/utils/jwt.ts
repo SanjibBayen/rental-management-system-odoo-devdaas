@@ -1,10 +1,12 @@
 import jwt from 'jsonwebtoken';
 
-const secret = process.env.JWT_SECRET || 'development-secret';
+const secret = process.env.JWT_SECRET_KEY || 'development-secret';
 
-export const generateToken = (userId: string | number) => {
-    return jwt.sign({ userId }, secret, { expiresIn: '7d' });
+export const generateToken = (user_id: string | number) => {
+    return jwt.sign({ user_id }, secret, { expiresIn: '7d' });
 };
+
+const t
 
 export const verifyToken = (token: string) => {
     try {

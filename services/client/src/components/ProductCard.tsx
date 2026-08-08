@@ -1,12 +1,16 @@
 import { Product } from '../types';
-import { Star } from 'lucide-react';
+import { Star, ShoppingCart } from 'lucide-react';
+import { useCart } from '../hooks/useCart';
 
 interface ProductCardProps {
   product: Product;
+  setActiveView?: (view: string) => void;
   key?: string | number;
 }
 
-export default function ProductCard({ product }: ProductCardProps) {
+export default function ProductCard({ product, setActiveView }: ProductCardProps) {
+  const { addToCart } = useCart();
+  
   const getBadgeStyle = () => {
     if (!product.badge) return '';
     switch (product.badge.type) {
@@ -14,6 +18,13 @@ export default function ProductCard({ product }: ProductCardProps) {
       case 'info': return 'bg-primary text-white';
       case 'warning': return 'bg-warning-amber text-white';
       default: return 'bg-surface-dim text-on-surface';
+    }
+  };
+
+  const handleRentNow = () => {
+    addToCart(product);
+    if (setActiveView) {
+      setActiveView('cart');
     }
   };
 
@@ -55,9 +66,21 @@ export default function ProductCard({ product }: ProductCardProps) {
               <span className="font-medium text-sm text-outline">/day</span>
             </div>
           </div>
-          <button className="bg-primary text-white font-bold text-xs px-4 py-2 rounded-lg hover:bg-opacity-90 transition-opacity shadow-sm cursor-pointer">
-            Rent Now
-          </button>
+          <div className="flex gap-2">
+            <button 
+              onClick={() => addToCart(product)}
+              className="bg-surface-muted text-primary border border-primary/20 font-bold p-2 rounded-lg hover:bg-primary/10 transition-colors shadow-sm cursor-pointer"
+              title="Add to Cart"
+            >
+              <ShoppingCart className="w-5 h-5" />
+            </button>
+            <button 
+              onClick={handleRentNow}
+              className="bg-primary text-white font-bold text-xs px-4 py-2 rounded-lg hover:bg-opacity-90 transition-opacity shadow-sm cursor-pointer"
+            >
+              Rent Now
+            </button>
+          </div>
         </div>
       </div>
     </div>
