@@ -24,7 +24,7 @@ export default function Navbar({ activeView, setActiveView }: NavbarProps) {
       <div className="flex justify-between items-center w-full max-w-7xl mx-auto px-margin-desktop py-3">
         {/* Brand */}
         <div className="flex items-center gap-2 text-2xl font-black tracking-tight text-primary cursor-pointer hover:opacity-90 transition-opacity">
-          <div className="w-8 h-8 bg-primary rounded flex items-center justify-center text-white text-lg font-bold">R</div>
+          {/* <div className="w-8 h-8 bg-primary rounded flex items-center justify-center text-white text-lg font-bold"></div> */}
           RentFlow
         </div>
         
