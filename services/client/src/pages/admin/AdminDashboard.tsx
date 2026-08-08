@@ -1,12 +1,22 @@
+import React, { useState } from 'react';
 import { Users, Package, Clock, DollarSign, ArrowRight } from 'lucide-react';
+import Modal from '../../components/Modal';
 
 export default function AdminDashboard() {
+  const [isNewRentalModalOpen, setIsNewRentalModalOpen] = useState(false);
+
+  const handleCreateRental = (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsNewRentalModalOpen(false);
+    alert('New rental created successfully! (Simulation)');
+  };
+
   return (
     <main className="flex-1 max-w-7xl mx-auto w-full px-margin-desktop py-8">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-black text-on-surface">Admin Dashboard</h1>
+        <h1 className="text-3xl font-black text-on-surface tracking-tight">Admin Dashboard</h1>
         <button 
-          onClick={() => alert("Redirecting to New Rental Draft...")}
+          onClick={() => setIsNewRentalModalOpen(true)}
           className="bg-primary text-white px-6 py-2 rounded-lg font-bold hover:bg-opacity-90 transition-opacity shadow-sm"
         >
           + New Rental
@@ -59,7 +69,7 @@ export default function AdminDashboard() {
       <div className="bg-white rounded-xl border border-border-standard shadow-sm overflow-hidden">
         <div className="px-6 py-4 border-b border-border-standard flex justify-between items-center bg-surface-muted">
           <h2 className="font-bold text-lg text-on-surface">Recent Rentals</h2>
-          <button onClick={() => alert("Viewing all rentals...")} className="text-primary font-bold text-sm flex items-center gap-1 hover:underline">
+          <button className="text-primary font-bold text-sm flex items-center gap-1 hover:underline">
             View All <ArrowRight className="w-4 h-4" />
           </button>
         </div>
@@ -101,6 +111,34 @@ export default function AdminDashboard() {
           </table>
         </div>
       </div>
+
+      <Modal isOpen={isNewRentalModalOpen} onClose={() => setIsNewRentalModalOpen(false)} title="Create New Rental">
+        <form onSubmit={handleCreateRental} className="space-y-4">
+          <div>
+            <label className="block text-sm font-bold text-on-surface mb-1">Customer Search</label>
+            <input required type="text" className="w-full px-4 py-2 border border-border-standard rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none" placeholder="Search by name or email..." />
+          </div>
+          <div>
+            <label className="block text-sm font-bold text-on-surface mb-1">Equipment Name</label>
+            <input required type="text" className="w-full px-4 py-2 border border-border-standard rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none" placeholder="Search equipment..." />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-bold text-on-surface mb-1">Start Date</label>
+              <input required type="date" className="w-full px-4 py-2 border border-border-standard rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none" />
+            </div>
+            <div>
+              <label className="block text-sm font-bold text-on-surface mb-1">End Date</label>
+              <input required type="date" className="w-full px-4 py-2 border border-border-standard rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none" />
+            </div>
+          </div>
+          <div className="pt-4 border-t border-border-standard flex justify-end gap-3">
+            <button type="button" onClick={() => setIsNewRentalModalOpen(false)} className="px-4 py-2 font-bold text-on-surface-variant hover:bg-surface-muted rounded-lg transition-colors">Cancel</button>
+            <button type="submit" className="px-6 py-2 bg-primary text-white font-bold rounded-lg hover:bg-opacity-90 transition-opacity">Create Rental</button>
+          </div>
+        </form>
+      </Modal>
+
     </main>
   );
 }

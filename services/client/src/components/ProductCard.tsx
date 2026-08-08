@@ -11,9 +11,14 @@ interface ProductCardProps {
 export default function ProductCard({ product, setActiveView }: ProductCardProps) {
   const { addToCart } = useCart();
   
+  // Logic: if rating > 4.5, it's Top Recommended
+  const displayBadge = product.rating > 4.5 
+    ? { text: 'Top Recommended', type: 'warning' as const } 
+    : product.badge;
+  
   const getBadgeStyle = () => {
-    if (!product.badge) return '';
-    switch (product.badge.type) {
+    if (!displayBadge) return '';
+    switch (displayBadge.type) {
       case 'success': return 'bg-success-teal text-white';
       case 'info': return 'bg-primary text-white';
       case 'warning': return 'bg-warning-amber text-white';
@@ -29,7 +34,7 @@ export default function ProductCard({ product, setActiveView }: ProductCardProps
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-border-standard overflow-hidden flex flex-col group hover:shadow-md hover:border-primary transition-all">
+    <div className="bg-white rounded-xl shadow-sm border border-border-standard overflow-hidden flex flex-col h-full group hover:shadow-md hover:border-primary transition-all">
       <div className="relative h-48 w-full bg-surface-container-low overflow-hidden flex items-center justify-center p-4">
         <img 
           src={product.image} 
@@ -37,9 +42,9 @@ export default function ProductCard({ product, setActiveView }: ProductCardProps
           className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500" 
           referrerPolicy="no-referrer"
         />
-        {product.badge && (
-          <div className={`absolute top-3 left-3 font-semibold text-[11px] uppercase tracking-wider px-2 py-1 rounded ${getBadgeStyle()}`}>
-            {product.badge.text}
+        {displayBadge && (
+          <div className={`absolute top-3 left-3 font-bold text-[10px] uppercase tracking-wider px-2.5 py-1 rounded-full shadow-sm ${getBadgeStyle()}`}>
+            {displayBadge.text}
           </div>
         )}
       </div>
@@ -48,7 +53,7 @@ export default function ProductCard({ product, setActiveView }: ProductCardProps
         <div className="text-outline font-bold text-[11px] uppercase tracking-wider mb-1">
           {product.brand}
         </div>
-        <h3 className="font-semibold text-lg text-on-surface mb-2 line-clamp-2 leading-tight">
+        <h3 className="font-bold text-lg text-on-surface mb-2 line-clamp-2 leading-tight">
           {product.name}
         </h3>
         
@@ -69,14 +74,14 @@ export default function ProductCard({ product, setActiveView }: ProductCardProps
           <div className="flex gap-2">
             <button 
               onClick={(e) => { e.stopPropagation(); addToCart(product); }}
-              className="bg-surface-muted text-primary border border-primary/20 font-bold p-2 rounded-lg hover:bg-primary/10 transition-colors shadow-sm cursor-pointer"
+              className="bg-surface-muted text-primary border border-primary/20 font-bold p-2.5 rounded-lg hover:bg-primary/10 transition-colors shadow-sm cursor-pointer"
               title="Add to Cart"
             >
               <ShoppingCart className="w-5 h-5" />
             </button>
             <button 
               onClick={(e) => { e.stopPropagation(); handleRentNow(); }}
-              className="bg-primary text-white font-bold text-xs px-4 py-2 rounded-lg hover:bg-opacity-90 transition-opacity shadow-sm cursor-pointer"
+              className="bg-primary text-white font-bold text-sm px-4 py-2.5 rounded-lg hover:bg-opacity-90 transition-opacity shadow-sm cursor-pointer"
             >
               Rent Now
             </button>
@@ -84,6 +89,5 @@ export default function ProductCard({ product, setActiveView }: ProductCardProps
         </div>
       </div>
     </div>
-  );    
+  );
 }
-      

@@ -1,7 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Mail, Phone, ExternalLink } from 'lucide-react';
+import Modal from '../../components/Modal';
 
 export default function Customers() {
+  const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+
   const customers = [
     { name: 'Sarah Jenkins', company: 'Jenkins Construction', email: 'sarah@jenkinsconst.com', phone: '+1 555-0123', activeRentals: 3, totalSpent: '₹14,500' },
     { name: 'Michael Chen', company: 'City Planners LLC', email: 'm.chen@cityplanners.com', phone: '+1 555-0198', activeRentals: 1, totalSpent: '₹2,300' },
@@ -25,7 +29,10 @@ export default function Customers() {
               <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xl">
                 {customer.name.charAt(0)}
               </div>
-              <button onClick={() => alert("View Customer Profile")} className="text-on-surface-variant hover:text-primary transition-colors">
+              <button 
+                onClick={() => { setSelectedCustomer(customer); setIsProfileModalOpen(true); }}
+                className="text-on-surface-variant hover:text-primary transition-colors p-2 bg-surface-muted hover:bg-primary/10 rounded-lg"
+              >
                 <ExternalLink className="w-5 h-5" />
               </button>
             </div>
@@ -54,6 +61,46 @@ export default function Customers() {
           </div>
         ))}
       </div>
+
+      <Modal isOpen={isProfileModalOpen} onClose={() => setIsProfileModalOpen(false)} title="Customer Profile">
+        {selectedCustomer && (
+          <div className="space-y-6">
+            <div className="flex items-center gap-4 bg-surface-muted p-4 rounded-xl border border-border-standard">
+              <div className="w-16 h-16 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-2xl">
+                {selectedCustomer.name.charAt(0)}
+              </div>
+              <div>
+                <h3 className="font-bold text-lg text-on-surface">{selectedCustomer.name}</h3>
+                <p className="text-outline font-medium text-sm">{selectedCustomer.company}</p>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-white border border-border-standard p-4 rounded-xl shadow-sm">
+                <div className="text-xs text-outline font-bold uppercase mb-1">Email</div>
+                <div className="text-sm font-bold text-on-surface">{selectedCustomer.email}</div>
+              </div>
+              <div className="bg-white border border-border-standard p-4 rounded-xl shadow-sm">
+                <div className="text-xs text-outline font-bold uppercase mb-1">Phone</div>
+                <div className="text-sm font-bold text-on-surface">{selectedCustomer.phone}</div>
+              </div>
+              <div className="bg-white border border-border-standard p-4 rounded-xl shadow-sm">
+                <div className="text-xs text-outline font-bold uppercase mb-1">Active Rentals</div>
+                <div className="text-sm font-bold text-on-surface">{selectedCustomer.activeRentals} Items</div>
+              </div>
+              <div className="bg-white border border-border-standard p-4 rounded-xl shadow-sm">
+                <div className="text-xs text-outline font-bold uppercase mb-1">Total Spent</div>
+                <div className="text-sm font-bold text-primary">{selectedCustomer.totalSpent}</div>
+              </div>
+            </div>
+
+            <div className="pt-4 border-t border-border-standard flex justify-end gap-3">
+              <button onClick={() => setIsProfileModalOpen(false)} className="px-6 py-2 bg-primary text-white font-bold rounded-lg hover:bg-opacity-90 transition-opacity">Close Profile</button>
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 }
+ 
