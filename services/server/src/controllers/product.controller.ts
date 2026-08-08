@@ -1,25 +1,36 @@
 import { Request, Response } from 'express';
 import { ProductService } from '../services/product.service';
+import { promises } from 'dns';
 
 const productService = new ProductService();
 
 export class ProductController {
-  async getAll(req: Request, res: Response) {
+  async getAll(req: Request, res: Response): Promise<void> {
     try {
-      const products = await productService.getAll();
-      res.json({ data: products });
+      const { id, name, price } = req.body;
+
+      if (!id || !name || !price) {
+        res.status(400).json({ error: 'Missing required fields: id, name, price' });
+        return;
+      } else {
+        res.status(200).json({
+          data: { id, name, price },
+          message: 'Products retrieved successfully'
+        });
+      }
     } catch (error: any) {
       res.status(500).json({ error: error.message });
     }
   }
 
-  async getById(req: Request, res: Response) {
+  async getById(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params;
       const product = await productService.getById(id);
 
       if (!product) {
-        return res.status(404).json({ error: 'Product not found' });
+        res.status(404).json({ error: 'Product not found' });
+        return;
       }
 
       res.json({ data: product });

@@ -3,19 +3,6 @@ import { z } from 'zod';
 
 dotenv.config({ path: '.env' });
 
-// Normalize common non-standard env var names to the expected keys
-process.env.EMAIL_USER =
-  process.env.EMAIL_USER ??
-  process.env.Email_User ??
-  process.env.email_user ??
-  process.env.EMAILUSER;
-process.env.EMAIL_PASS =
-  process.env.EMAIL_PASS ??
-  process.env.Email_Password ??
-  process.env.Email_Pass ??
-  process.env.email_pass ??
-  process.env.EMAILPASSWORD;
-
 const envSchema = z.object({
   // App
   PORT: z.string().default('5000').transform(Number),
@@ -40,15 +27,15 @@ const envSchema = z.object({
     .default('true')
     .transform((val) => val === 'true'),
 
-  // Nodemailer
-  EMAIL_HOST: z.string().default('smtp.gmail.com'),
-  EMAIL_PORT: z.string().default('587').transform(Number),
-  EMAIL_SECURE: z
+  // Nodemailer (SMTP) - ✅ UPDATED TO SUPPORT SMTP_* NAMES
+  SMTP_HOST: z.string().default('smtp.gmail.com'),
+  SMTP_PORT: z.string().default('587').transform(Number),
+  SMTP_SECURE: z
     .string()
     .default('false')
     .transform((val) => val === 'true'),
-  EMAIL_USER: z.string().min(1),
-  EMAIL_PASS: z.string().min(1),
+  SMTP_USER: z.string().min(1),
+  SMTP_PASS: z.string().min(1),
   EMAIL_FROM: z.string().email().default('noreply@rental.com'),
   WEB_NAME: z.string().default('Rental Management System'),
   WEB_URL: z.string().url().default('http://localhost:3000'),
@@ -85,11 +72,11 @@ export const config = {
     tlsEnabled: env.REDIS_TLS_ENABLED,
   },
   email: {
-    host: env.EMAIL_HOST,
-    port: env.EMAIL_PORT,
-    secure: env.EMAIL_SECURE,
-    user: env.EMAIL_USER,
-    pass: env.EMAIL_PASS,
+    host: env.SMTP_HOST,    
+    port: env.SMTP_PORT,      
+    secure: env.SMTP_SECURE, 
+    user: env.SMTP_USER,      
+    pass: env.SMTP_PASS,     
     from: env.EMAIL_FROM,
   },
   cors: {

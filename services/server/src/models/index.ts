@@ -18,4 +18,5 @@ export { default as rentalPeriodSchema } from "./rentalPeriod.schema.js";
 export { default as returnSchema } from "./return.schema.js";
 export { default as securityDepositSchema } from "./securityDeposit.schema.js";
 export { default as userSchema } from "./user.schema.js";
+export * from './emailVerification.model';
 

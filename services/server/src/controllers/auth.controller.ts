@@ -22,7 +22,9 @@ const hashOTP = (otp: string): string => {
 };
 
 export class AuthController {
-
+  // ============================================================
+  // 1. REGISTER
+  // ============================================================
   async register(req: Request, res: Response): Promise<void> {
     try {
       const { email, password, full_name, phone, role } = req.body;
@@ -128,7 +130,9 @@ export class AuthController {
     }
   }
 
-
+  // ============================================================
+  // 2. LOGIN
+  // ============================================================
   async login(req: Request, res: Response): Promise<void> {
     try {
       const { email, password } = req.body;
@@ -213,7 +217,9 @@ export class AuthController {
     }
   }
 
-
+  // ============================================================
+  // 3. GET CURRENT USER
+  // ============================================================
   async getMe(req: Request, res: Response): Promise<void> {
     try {
       const userId = (req as any).user?.id;
@@ -257,7 +263,9 @@ export class AuthController {
     }
   }
 
-
+  // ============================================================
+  // 4. LOGOUT
+  // ============================================================
   async logout(req: Request, res: Response): Promise<void> {
     try {
       const userId = (req as any).user?.id;
@@ -283,12 +291,22 @@ export class AuthController {
     }
   }
 
-
+  // ============================================================
+  // 5. VERIFY OTP
+  // ============================================================
   async verifyOTP(req: Request, res: Response): Promise<void> {
     try {
       const { userId, otp } = req.body;
 
-      // Fetch OTP record
+      if (!userId || !otp) {
+        res.status(400).json({
+          success: false,
+          message: 'userId and otp are required.',
+        });
+        return;
+      }
+
+      // 1. Fetch the latest unverified OTP for this user
       const record = await queryOne(
         `SELECT otp_hash, expires_at, verified
          FROM email_verification_otps
@@ -301,12 +319,12 @@ export class AuthController {
       if (!record) {
         res.status(400).json({
           success: false,
-          message: 'Invalid or expired OTP.',
+          message: 'No pending OTP found. Please request a new one.',
         });
         return;
       }
 
-      // Check expiry
+      // 2. Check if OTP has expired
       if (new Date() > new Date(record.expires_at)) {
         res.status(400).json({
           success: false,
@@ -315,7 +333,7 @@ export class AuthController {
         return;
       }
 
-      // Verify OTP hash
+      // 3. Hash the input OTP and compare with stored hash
       const otpHash = hashOTP(otp);
       if (otpHash !== record.otp_hash) {
         res.status(400).json({
@@ -325,13 +343,13 @@ export class AuthController {
         return;
       }
 
-      // Mark user as verified
+      // 4. Mark user as email_verified
       await query(
         `UPDATE user_profiles SET email_verified = true WHERE id = $1`,
         [userId]
       );
 
-      // Mark OTP as used
+      // 5. Mark OTP as used (verified)
       await query(
         `UPDATE email_verification_otps SET verified = true WHERE user_id = $1`,
         [userId]
@@ -339,7 +357,7 @@ export class AuthController {
 
       res.status(200).json({
         success: true,
-        message: 'Email verified successfully.',
+        message: 'Email verified successfully. You can now log in.',
       });
     } catch (error: unknown) {
       console.error(
@@ -349,6 +367,55 @@ export class AuthController {
       res.status(500).json({
         success: false,
         message: 'Verification failed.',
+      });
+    }
+  }
+
+  // ============================================================
+  // 6. RESEND OTP (Optional)
+  // ============================================================
+  async resendOTP(req: Request, res: Response): Promise<void> {
+    try {
+      const { userId, email } = req.body;
+
+      if (!userId || !email) {
+        res.status(400).json({
+          success: false,
+          message: 'userId and email are required.',
+        });
+        return;
+      }
+
+      // Generate new OTP
+      const otp = generateOTP();
+      const otpHash = hashOTP(otp);
+      const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+
+      // Delete old OTPs
+      await query(
+        `DELETE FROM email_verification_otps WHERE user_id = $1`,
+        [userId]
+      );
+
+      // Insert new OTP
+      await query(
+        `INSERT INTO email_verification_otps (user_id, email, otp_hash, expires_at)
+         VALUES ($1, $2, $3, $4)`,
+        [userId, email, otpHash, expiresAt]
+      );
+
+      // Send email
+      await sendVerificationOTP(email, otp);
+
+      res.json({
+        success: true,
+        message: 'New OTP sent successfully. Please check your email.',
+      });
+    } catch (error: unknown) {
+      console.error('Resend OTP error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to resend OTP.',
       });
     }
   }
