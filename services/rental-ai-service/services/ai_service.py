@@ -5,9 +5,7 @@ from datetime import datetime, timedelta
 
 class AIService:
     
-    # ============================================================
-    # 1. Predictive Maintenance
-    # ============================================================
+  
     def predict_maintenance(self, rental_frequency: int, product_age: int) -> dict:
         """Predicts when maintenance is needed based on usage."""
         risk_score = min(100, (rental_frequency * 2) + (product_age * 1.5))
@@ -27,9 +25,7 @@ class AIService:
             "estimated_next_maintenance_days": max(0, int(100 - risk_score))
         }
     
-    # ============================================================
-    # 2. Route Optimization (Nearest Neighbor)
-    # ============================================================
+
     def _haversine_distance(self, lat1: float, lon1: float, lat2: float, lon2: float) -> float:
         """Calculate distance between two coordinates in km."""
         R = 6371  # Earth's radius in km
@@ -44,8 +40,7 @@ class AIService:
         if len(addresses) <= 1:
             return addresses
 
-        # Generate random lat/lng for demo purposes
-        # In production, you would geocode addresses using Google Maps API
+ 
         coords = [
             (random.uniform(28.0, 29.0), random.uniform(77.0, 78.0))  # Delhi region
             for _ in addresses
@@ -53,7 +48,7 @@ class AIService:
 
         # Nearest Neighbor Algorithm
         unvisited = list(range(len(coords)))
-        route = [unvisited.pop(0)]  # Start with first address
+        route = [unvisited.pop(0)] 
         current = route[-1]
 
         while unvisited:
@@ -71,9 +66,7 @@ class AIService:
         # Return original addresses in optimized order
         return [addresses[i] for i in route]
     
-    # ============================================================
-    # 3. Product Availability Forecasting
-    # ============================================================
+  
     def forecast_demand(self, historical_data: List[int]) -> dict:
         """Forecasts future demand using Weighted Moving Average."""
         if not historical_data:
@@ -82,11 +75,11 @@ class AIService:
         if len(historical_data) == 1:
             return {"forecast": historical_data[0], "trend": "stable", "confidence": 30}
         
-        # Weighted Moving Average (recent data gets higher weight)
+    
         weights = [i+1 for i in range(len(historical_data))]
         weighted_avg = sum(h * w for h, w in zip(historical_data, weights)) / sum(weights)
         
-        # Determine trend
+      
         if len(historical_data) >= 3:
             recent_avg = sum(historical_data[-3:]) / 3
             if recent_avg > weighted_avg * 1.1:
@@ -105,10 +98,7 @@ class AIService:
             "trend": trend,
             "confidence": min(100, len(historical_data) * 15)
         }
-    
-    # ============================================================
-    # 4. Smart Reminders (Optimal Timing)
-    # ============================================================
+
     def get_optimal_reminder_time(self, rental_end_date: str) -> dict:
         """Calculates the best time to send a return reminder."""
         end_date = datetime.fromisoformat(rental_end_date)
