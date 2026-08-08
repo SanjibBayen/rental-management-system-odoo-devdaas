@@ -7,7 +7,7 @@ export class RentalController {
   // GET /api/rentals
   async getAll(req: Request, res: Response) {
     try {
-      const rentals = await rentalService.findAll();
+      const rentals = await rentalService.getAll();
       res.json({ data: rentals });
     } catch (error: any) {
       res.status(500).json({ error: error.message });
@@ -55,7 +55,7 @@ export class RentalController {
 
       res.json({
         message: 'Rental returned successfully',
-        data: rental
+        data: rental,
       });
     } catch (error: any) {
       if (error.message.includes('not found')) {

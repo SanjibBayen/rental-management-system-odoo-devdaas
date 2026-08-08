@@ -11,8 +11,8 @@ export class DashboardController {
       const [activeRentals, overdueRentals, totalProducts, revenue] = await Promise.all([
         rentalService.getActiveRentals(),
         rentalService.getOverdueRentals(),
-        productService.findAll(),
-        rentalService.getTotalRevenue()
+        productService.getAll(),
+        rentalService.getTotalRevenue(),
       ]);
 
       res.json({
@@ -21,8 +21,8 @@ export class DashboardController {
           overdueRentals: overdueRentals.length,
           totalProducts: totalProducts.length,
           totalRevenue: revenue,
-          today: new Date().toISOString().split('T')[0]
-        }
+          today: new Date().toISOString().split('T')[0],
+        },
       });
     } catch (error: any) {
       res.status(500).json({ error: error.message });

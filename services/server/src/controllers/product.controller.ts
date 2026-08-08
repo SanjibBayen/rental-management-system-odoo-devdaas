@@ -6,7 +6,7 @@ const productService = new ProductService();
 export class ProductController {
   async getAll(req: Request, res: Response) {
     try {
-      const products = await productService.findAll();
+      const products = await productService.getAll();
       res.json({ data: products });
     } catch (error: any) {
       res.status(500).json({ error: error.message });
@@ -16,7 +16,7 @@ export class ProductController {
   async getById(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const product = await productService.findById(id);
+      const product = await productService.getById(id);
 
       if (!product) {
         return res.status(404).json({ error: 'Product not found' });
@@ -62,7 +62,7 @@ export class ProductController {
   async getByCategory(req: Request, res: Response) {
     try {
       const { category } = req.params;
-      const products = await productService.findByCategory(category);
+      const products = await productService.getByCategory(category);
       res.json({ data: products });
     } catch (error: any) {
       res.status(500).json({ error: error.message });

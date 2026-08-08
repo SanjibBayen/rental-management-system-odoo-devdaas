@@ -1,9 +1,0 @@
-import { supabase } from '../config/database';
-
-export async function getUserById(id: string) {
-  const { data, error } = await supabase.from('users').select('*').eq('id', id).limit(1);
-  if (error) throw error;
-  return data?.[0] ?? null;
-}
-
-export default { getUserById };

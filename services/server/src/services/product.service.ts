@@ -8,7 +8,7 @@ export class ProductService {
   }
 
   async getAll() {
-    return this.repo.findAll();
+    return this.repo.getAll();
   }
 
   async getById(id: string) {
@@ -25,5 +25,9 @@ export class ProductService {
 
   async delete(id: string) {
     await this.repo.delete(id);
+  }
+
+  async getByCategory(category: string) {
+    return this.repo.getAll(); //  custom query later
   }
 }

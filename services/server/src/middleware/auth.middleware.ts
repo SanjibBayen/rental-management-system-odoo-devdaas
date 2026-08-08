@@ -1,24 +1,31 @@
 import type { Request, Response, NextFunction } from "express";
 import type { JwtPayload } from "jsonwebtoken";
 import { verifyToken } from "../utils/jwt.js";
-import { supabase } from "../config/supabase.js";
+import { queryOne } from "../config/database.js";
 
+// Extend Express Request type
 declare global {
     namespace Express {
         interface Request {
-            user_id?: unknown;
+            user?: {
+                id: string;
+                email: string;
+                full_name: string;
+                phone?: string;
+                role: 'admin' | 'customer' | 'delivery';
+                email_verified: boolean;
+            };
         }
     }
 }
 
-export const protect = async (
+export const authMiddleware = async (
     req: Request,
     res: Response,
     next: NextFunction
 ): Promise<void> => {
     try {
-        // Get the authorization header from the request
-
+        // 1. Get authorization header
         const authorization = req.headers.authorization;
 
         if (!authorization) {
@@ -28,21 +35,19 @@ export const protect = async (
             });
             return;
         }
-        //Extract the token from the authorization header
 
+        // 2. Extract token
         const [scheme, token] = authorization.split(" ");
 
-        if (
-            scheme?.toLowerCase() !== "bearer" ||
-            !token
-        ) {
+        if (scheme?.toLowerCase() !== "bearer" || !token) {
             res.status(401).json({
                 success: false,
                 message: "Invalid authorization format.",
             });
             return;
         }
-        // Verify the token and decode it
+
+        // 3. Verify JWT token
         const decoded = verifyToken(token) as string | JwtPayload;
 
         if (!decoded || typeof decoded === "string") {
@@ -52,8 +57,8 @@ export const protect = async (
             });
             return;
         }
-        // Check if the decoded token contains a user_id
 
+        // 4. Check if decoded contains user_id
         if (!decoded.user_id) {
             res.status(401).json({
                 success: false,
@@ -61,24 +66,14 @@ export const protect = async (
             });
             return;
         }
-        // find user
 
-        const { data: user, error } = await supabase
-            .from("profiles")
-            .select("*")
-            .eq("id", decoded.user_id)
-
-        if (error) {
-            console.error("Supabase user lookup error:", error);
-
-            res.status(401).json({
-                success: false,
-                message: "Unable to authenticate user.",
-            });
-            return;
-        }
-
-        // user validation
+        // 5. Find user in local PostgreSQL
+        const user = await queryOne(
+            `SELECT id, email, full_name, phone, role, email_verified, created_at
+             FROM user_profiles
+             WHERE id = $1`,
+            [decoded.user_id]
+        );
 
         if (!user) {
             res.status(401).json({
@@ -88,9 +83,17 @@ export const protect = async (
             return;
         }
 
-        // Add the user object to the request
-        req.user_id = user;
-        /// Continue to the next middleware
+        // 6. Attach clean user object to request
+        req.user = {
+            id: user.id,
+            email: user.email,
+            full_name: user.full_name,
+            phone: user.phone,
+            role: user.role,
+            email_verified: user.email_verified,
+        };
+
+        // 7. Continue to next middleware
         next();
     } catch (error: unknown) {
         console.error(
@@ -104,4 +107,3 @@ export const protect = async (
         });
     }
 };
-

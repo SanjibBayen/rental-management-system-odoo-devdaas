@@ -1,17 +1,18 @@
 import jwt from 'jsonwebtoken';
+import { config } from '../config/env';
 
-const secret = process.env.JWT_SECRET_KEY || 'development-secret';
-
-export const generateToken = (user_id: string | number) => {
-    return jwt.sign({ user_id }, secret, { expiresIn: '7d' });
+export const generateToken = (userId: string, role: string) => {
+  return jwt.sign(
+    { user_id: userId, role },
+    config.app.jwtSecret,
+    { expiresIn: '7d' }
+  );
 };
 
-const t
-
 export const verifyToken = (token: string) => {
-    try {
-        return jwt.verify(token, secret);
-    } catch (error) {
-        return null;
-    }
+  try {
+    return jwt.verify(token, config.app.jwtSecret);
+  } catch (error) {
+    return null;
+  }
 };

@@ -1,4 +1,3 @@
-import { createClient } from '@supabase/supabase-js/dist/index.cjs';
 import dotenv from 'dotenv';
 import { z } from 'zod';
 
@@ -11,10 +10,12 @@ const envSchema = z.object({
   JWT_SECRET: z.string().min(10),
   JWT_EXPIRES_IN: z.string().default('7d'),
 
-  // Supabase
-  SUPABASE_URL: z.string().url(),
-  SUPABASE_ANON_KEY: z.string().min(1),
-  SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
+  // PostgreSQL 
+  DB_HOST: z.string().default('localhost'),
+  DB_PORT: z.string().default('5432').transform(Number),
+  DB_USER: z.string().default('postgres'),
+  DB_PASSWORD: z.string().default('password'),
+  DB_NAME: z.string().default('rental_db'),
 
   // Redis
   REDIS_HOST: z.string().default('mint-jewel-night-31515.db.redis.io'),
@@ -23,9 +24,13 @@ const envSchema = z.object({
   REDIS_DB: z.string().default('0').transform(Number),
   REDIS_TLS_ENABLED: z.string().default('true').transform(val => val === 'true'),
 
-  // Resend Email
-  RESEND_API_KEY: z.string().min(1),
-  RESEND_FROM_EMAIL: z.string().email().default('noreply@rental.com'),
+  // Nodemailer 
+  EMAIL_HOST: z.string().default('smtp.gmail.com'),
+  EMAIL_PORT: z.string().default('587').transform(Number),
+  EMAIL_SECURE: z.string().default('false').transform(val => val === 'true'),
+  EMAIL_USER: z.string().min(1),
+  EMAIL_PASS: z.string().min(1),
+  EMAIL_FROM: z.string().email().default('noreply@rental.com'),
 
   // CORS
   CLIENT_URL: z.string().url().default('http://localhost:3000'),
@@ -44,10 +49,12 @@ export const config = {
     jwtSecret: env.JWT_SECRET,
     jwtExpiresIn: env.JWT_EXPIRES_IN
   },
-  supabase: {
-    url: env.SUPABASE_URL,
-    anonKey: env.SUPABASE_ANON_KEY,
-    serviceRoleKey: env.SUPABASE_SERVICE_ROLE_KEY
+  db: {
+    host: env.DB_HOST,
+    port: env.DB_PORT,
+    user: env.DB_USER,
+    password: env.DB_PASSWORD,
+    database: env.DB_NAME
   },
   redis: {
     host: env.REDIS_HOST,
@@ -56,9 +63,13 @@ export const config = {
     db: env.REDIS_DB,
     tlsEnabled: env.REDIS_TLS_ENABLED
   },
-  email: {
-    apiKey: env.RESEND_API_KEY,
-    fromEmail: env.RESEND_FROM_EMAIL
+  email: { 
+    host: env.EMAIL_HOST,
+    port: env.EMAIL_PORT,
+    secure: env.EMAIL_SECURE,
+    user: env.EMAIL_USER,
+    pass: env.EMAIL_PASS,
+    from: env.EMAIL_FROM
   },
   cors: {
     clientUrl: env.CLIENT_URL
@@ -68,13 +79,3 @@ export const config = {
     window: env.RATE_LIMIT_WINDOW
   }
 };
-
-export const supabase = createClient(
-  config.supabase.url,
-  config.supabase.anonKey
-);
-
-export const supabaseAdmin = createClient(
-  config.supabase.url,
-  config.supabase.serviceRoleKey
-);

@@ -7,11 +7,11 @@ export class BaseRepository {
     this.table = table;
   }
 
-  async findAll(): Promise<any[]> {
+  async getAll(): Promise<any[]> {
     return query(`SELECT * FROM ${this.table}`);
   }
 
-  async findById(id: string): Promise<any | null> {
+  async getById(id: string): Promise<any | null> {
     return queryOne(`SELECT * FROM ${this.table} WHERE id = $1`, [id]);
   }
 

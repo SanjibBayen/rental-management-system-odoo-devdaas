@@ -1,15 +1,18 @@
 import { Router } from 'express';
 import { ProductController } from '../controllers/product.controller';
-import { supabaseAuth } from '../middleware/supabaseAuth.middleware';
+import { authMiddleware } from '../middleware/auth.middleware';
 import { rbacMiddleware } from '../middleware/rbac.middleware';
 
 const router = Router();
 const controller = new ProductController();
 
+// Public routes (no auth)
 router.get('/', controller.getAll);
 router.get('/:id', controller.getById);
-router.post('/', supabaseAuth, rbacMiddleware(['admin']), controller.create);
-router.put('/:id', supabaseAuth, rbacMiddleware(['admin']), controller.update);
-router.delete('/:id', supabaseAuth, rbacMiddleware(['admin']), controller.delete);
+
+// Admin only
+router.post('/', authMiddleware, rbacMiddleware(['admin']), controller.create);
+router.put('/:id', authMiddleware, rbacMiddleware(['admin']), controller.update);
+router.delete('/:id', authMiddleware, rbacMiddleware(['admin']), controller.delete);
 
 export { router as productRoutes };
