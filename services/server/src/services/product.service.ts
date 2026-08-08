@@ -12,7 +12,7 @@ export class ProductService {
   }
 
   async getById(id: string) {
-    return this.repo.findById(id);
+    return this.repo.getById(id);
   }
 
   async create(data: any) {
