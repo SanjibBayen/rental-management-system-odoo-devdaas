@@ -6,8 +6,13 @@ const pickupService = new PickupService();
 export class PickupController {
   async getTodayPickups(req: Request, res: Response) {
     try {
+      const { id, rental_id, scheduled_at, completed_at, status } = req.body;
+      if (!id || !rental_id || !scheduled_at || !completed_at || !status) {
+        res.status(400).json({ error: 'Missing required fields: id, rental_id, scheduled_at, completed_at, status' });
+        return;
+      }
       const pickups = await pickupService.getTodayPickups();
-      res.json({ data: pickups });
+      res.status(200).json({ data: pickups });
     } catch (error: any) {
       res.status(500).json({ error: error.message });
     }
