@@ -1,3 +1,4 @@
+import { supabase } from '../config/database';
 import { BaseService } from './base.service';
 
 export class ProductService extends BaseService {
