@@ -10,7 +10,7 @@ export default function Inventory() {
           <h1 className="text-3xl font-black text-on-surface tracking-tight">Inventory Management</h1>
           <p className="text-on-surface-variant font-medium mt-1">Manage your rental equipment and stock levels.</p>
         </div>
-        <button className="bg-primary text-white px-4 py-2 rounded-lg font-bold hover:opacity-90 transition-opacity flex items-center gap-2">
+        <button onClick={() => alert("Add Item Modal")} className="bg-primary text-white px-4 py-2 rounded-lg font-bold hover:opacity-90 transition-opacity flex items-center gap-2">
           <Plus className="w-5 h-5" /> Add Item
         </button>
       </div>
@@ -58,8 +58,8 @@ export default function Inventory() {
                   </td>
                   <td className="px-6 py-4 text-right">
                     <div className="flex justify-end items-center gap-2">
-                      <button className="p-1 text-on-surface-variant hover:text-primary transition-colors"><Edit2 className="w-4 h-4" /></button>
-                      <button className="p-1 text-on-surface-variant hover:text-danger-red transition-colors"><Trash2 className="w-4 h-4" /></button>
+                      <button onClick={() => alert("Edit item")} className="p-1 text-on-surface-variant hover:text-primary transition-colors"><Edit2 className="w-4 h-4" /></button>
+                      <button onClick={() => alert("Delete item")} className="p-1 text-on-surface-variant hover:text-danger-red transition-colors"><Trash2 className="w-4 h-4" /></button>
                     </div>
                   </td>
                 </tr>
