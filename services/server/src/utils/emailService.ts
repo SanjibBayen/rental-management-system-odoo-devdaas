@@ -1,6 +1,4 @@
 export async function sendEmail(to: string, subject: string, _html: string) {
-  // Placeholder email sender. Integrate Resend or another provider in future.
-  // For now, log and return a resolved promise.
   console.log(`sendEmail to=${to} subject=${subject}`);
   return Promise.resolve(true);
 }
