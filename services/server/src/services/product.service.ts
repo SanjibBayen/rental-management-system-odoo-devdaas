@@ -1,6 +1,6 @@
 import { supabase } from '../config/database';
 import { BaseService } from './base.service';
-import { supabase } from '../config/database';
+
 
 export class ProductService extends BaseService {
   constructor() {
