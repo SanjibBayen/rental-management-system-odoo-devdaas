@@ -38,12 +38,12 @@ export default function MyRentals() {
     <div className="w-full max-w-7xl mx-auto px-margin-desktop py-8">
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-black text-on-surface tracking-tight">My Rentals</h1>
-          <p className="text-on-surface-variant font-medium mt-1">Manage your active rentals and view past orders.</p>
+          <h1 className="text-2xl font-bold text-on-surface tracking-tight">My Rentals</h1>
+          <p className="text-on-surface-variant text-sm font-medium mt-1">Manage your active rentals and view past orders.</p>
         </div>
         <button 
           onClick={() => { setSelectedRental(rentals[0]); setIsExtendModalOpen(true); }}
-          className="bg-surface-muted text-primary px-4 py-2 rounded-lg font-bold hover:bg-primary/10 transition-colors border border-border-standard flex items-center gap-2"
+          className="bg-surface-muted text-primary px-4 py-2 rounded-lg font-bold text-sm hover:bg-primary/10 transition-colors border border-border-standard flex items-center gap-2 shadow-sm"
         >
           <Calendar className="w-4 h-4" /> Extend a Rental
         </button>
