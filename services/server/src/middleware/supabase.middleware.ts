@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 
 export const supabaseAuth = (_req: Request, _res: Response, next: NextFunction) => {
-  // Placeholder supabase auth middleware — implement actual auth as needed
+  
   next();
 };
 
