@@ -25,7 +25,7 @@ import Profile from './pages/public/Profile';
 import { useAuth } from './hooks/useAuth';
 
 export default function App() {
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
   const [activeView, setActiveView] = useState('dashboard');
   const [selectedProductId, setSelectedProductId] = useState<string>('');
   
@@ -36,6 +36,16 @@ export default function App() {
       else if (user.role === 'delivery') setActiveView('tasks');
     }
   }, [user]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-surface-muted flex items-center justify-center">
+        <div className="animate-pulse text-on-surface-variant text-lg font-medium">
+          Loading...
+        </div>
+      </div>
+    );
+  }
 
   if (!user) {
     return <Login />;
@@ -71,4 +81,3 @@ export default function App() {
     </div>
   );
 }
-   

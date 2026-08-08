@@ -1,15 +1,161 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MapPin, Navigation2, Clock, CheckCircle, Package } from 'lucide-react';
+import { api } from '../../utils/api';
+import { useAuth } from '../../hooks/useAuth';
+import { formatDate } from '../../utils/dateHelpers';
+
+interface RouteStop {
+  id: string;
+  type: 'Pickup' | 'Delivery' | 'Return';
+  location: string;
+  address: string;
+  time: string;
+  status: 'Pending' | 'In Progress' | 'Completed';
+  distance: string;
+  rentalId?: string;
+}
 
 export default function Route() {
+  const [stops, setStops] = useState<RouteStop[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [isNavigating, setIsNavigating] = useState(false);
-  
-  const stops = [
-    { id: 1, type: 'Pickup', location: 'Main Warehouse - Section A', time: '08:00 AM', status: 'Completed', distance: '0 km' },
-    { id: 2, type: 'Delivery', location: '123 Construction Site, Downtown', time: '09:30 AM', status: 'In Progress', distance: '12.5 km' },
-    { id: 3, type: 'Pickup', location: '456 Industrial Park, Westside', time: '11:00 AM', status: 'Pending', distance: '8.2 km' },
-    { id: 4, type: 'Delivery', location: '789 Residential Complex, North', time: '02:00 PM', status: 'Pending', distance: '15.0 km' }
-  ];
+  const { user } = useAuth();
+
+  useEffect(() => {
+    fetchRouteStops();
+  }, []);
+
+  const fetchRouteStops = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      // Fetch today's pickups and returns
+      const [pickupsRes, returnsRes] = await Promise.all([
+        api.pickups.getToday(),
+        api.returns.getToday(),
+      ]);
+
+      // Map pickups to stops
+      const pickupStops: RouteStop[] = (pickupsRes.data || []).map((p: any) => ({
+        id: p.id,
+        type: 'Pickup',
+        location: p.customer_name || 'Unknown Customer',
+        address: p.address_line1 || 'No address provided',
+        time: new Date(p.scheduled_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        status: 'Pending',
+        distance: '—',
+        rentalId: p.rental_id,
+      }));
+
+      // Map returns to stops
+      const returnStops: RouteStop[] = (returnsRes.data || []).map((r: any) => ({
+        id: r.id,
+        type: 'Return',
+        location: r.customer_name || 'Unknown Customer',
+        address: r.address_line1 || 'No address provided',
+        time: new Date(r.return_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        status: 'Pending',
+        distance: '—',
+        rentalId: r.rental_id,
+      }));
+
+      // Combine, sort by time, and optimize route via AI
+      const allStops = [...pickupStops, ...returnStops]
+        .sort((a, b) => a.time.localeCompare(b.time));
+
+      // If there are addresses, try to optimize route via AI
+      if (allStops.length > 1) {
+        try {
+          const addresses = allStops.map(s => s.address);
+          const optimized = await api.ai.optimizeRoute({ addresses });
+          // Reorder stops based on optimized route
+          const orderedStops = optimized.optimized_route
+            .map((address: string) => allStops.find(s => s.address === address))
+            .filter(Boolean) as RouteStop[];
+          setStops(orderedStops);
+        } catch (err) {
+          // Fallback to time-based order if AI fails
+          setStops(allStops);
+        }
+      } else {
+        setStops(allStops);
+      }
+    } catch (err) {
+      console.error('Failed to fetch route stops:', err);
+      setError('Failed to load route. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleStartNavigation = () => {
+    setIsNavigating(true);
+    // Update first pending stop to 'In Progress'
+    const firstPending = stops.find(s => s.status === 'Pending');
+    if (firstPending) {
+      setStops(stops.map(s => 
+        s.id === firstPending.id ? { ...s, status: 'In Progress' } : s
+      ));
+    }
+    setTimeout(() => setIsNavigating(false), 5000);
+  };
+
+  const handleCompleteStop = async (stopId: string) => {
+    try {
+      const stop = stops.find(s => s.id === stopId);
+      if (!stop) return;
+
+      // Update status in backend
+      if (stop.type === 'Pickup') {
+        await api.pickups.confirm(stopId, { notes: 'Completed via route' });
+      } else if (stop.type === 'Return') {
+        await api.returns.confirm(stopId);
+      }
+
+      // Update UI
+      setStops(stops.map(s => 
+        s.id === stopId ? { ...s, status: 'Completed' } : s
+      ));
+
+      // Auto-start next pending stop
+      const nextPending = stops.find(s => s.status === 'Pending' && s.id !== stopId);
+      if (nextPending) {
+        setStops(stops.map(s => 
+          s.id === nextPending.id ? { ...s, status: 'In Progress' } : s
+        ));
+      }
+    } catch (err) {
+      console.error('Failed to complete stop:', err);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="w-full max-w-7xl mx-auto px-margin-desktop py-8">
+        <div className="flex justify-center items-center py-20">
+          <div className="animate-pulse text-on-surface-variant">Loading route...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="w-full max-w-7xl mx-auto px-margin-desktop py-8">
+        <div className="text-center py-20">
+          <p className="text-danger-red font-bold">{error}</p>
+          <button 
+            onClick={fetchRouteStops}
+            className="mt-4 px-4 py-2 bg-primary text-white rounded-lg hover:bg-opacity-90"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full max-w-7xl mx-auto px-margin-desktop py-8 relative">
@@ -30,13 +176,16 @@ export default function Route() {
           <p className="text-on-surface-variant font-medium text-sm mt-1">Optimized path for {stops.length} scheduled stops.</p>
         </div>
         <button 
-          onClick={() => {
-            setIsNavigating(true);
-            setTimeout(() => setIsNavigating(false), 5000);
-          }}
-          className={`px-5 py-2.5 rounded-lg font-bold text-sm flex items-center gap-2 transition-all shadow-sm ${isNavigating ? 'bg-surface-muted text-on-surface-variant cursor-not-allowed' : 'bg-primary text-white hover:bg-opacity-90 active:scale-95'}`}
+          onClick={handleStartNavigation}
+          disabled={isNavigating || stops.every(s => s.status === 'Completed')}
+          className={`px-5 py-2.5 rounded-lg font-bold text-sm flex items-center gap-2 transition-all shadow-sm ${
+            isNavigating || stops.every(s => s.status === 'Completed')
+              ? 'bg-surface-muted text-on-surface-variant cursor-not-allowed'
+              : 'bg-primary text-white hover:bg-opacity-90 active:scale-95'
+          }`}
         >
-          <Navigation2 className="w-4 h-4" /> {isNavigating ? 'Navigating...' : 'Start Navigation'}
+          <Navigation2 className="w-4 h-4" /> 
+          {isNavigating ? 'Navigating...' : stops.every(s => s.status === 'Completed') ? 'Route Complete' : 'Start Navigation'}
         </button>
       </div>
 
@@ -60,36 +209,50 @@ export default function Route() {
           <h2 className="text-xl font-black text-on-surface mb-6 border-b border-border-standard pb-4">Stops Schedule</h2>
           
           <div className="space-y-4">
-            {stops.map((stop, index) => (
-              <div key={stop.id} className={`p-4 rounded-xl border ${stop.status === 'Completed' ? 'border-success-teal/30 bg-success-teal/5' : stop.status === 'In Progress' ? 'border-primary shadow-md bg-primary/5' : 'border-border-standard'} transition-all`}>
-                <div className="flex justify-between items-start mb-2">
-                  <div className="flex items-center gap-2">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white ${stop.status === 'Completed' ? 'bg-success-teal' : stop.status === 'In Progress' ? 'bg-primary' : 'bg-surface-dim text-on-surface'}`}>
-                      {stop.status === 'Completed' ? <CheckCircle className="w-4 h-4" /> : <span>{index + 1}</span>}
-                    </div>
-                    <span className={`text-xs font-bold px-2 py-1 rounded-md ${stop.type === 'Delivery' ? 'bg-info-blue/10 text-info-blue' : 'bg-warning-amber/10 text-warning-amber'}`}>
-                      {stop.type}
-                    </span>
-                  </div>
-                  <span className="text-xs font-bold text-outline flex items-center gap-1">
-                    <Clock className="w-3 h-3" /> {stop.time}
-                  </span>
-                </div>
-                
-                <h4 className="font-bold text-sm text-on-surface leading-tight mb-2 mt-3">{stop.location}</h4>
-                
-                <div className="flex items-center justify-between mt-2 pt-2 border-t border-border-standard/50">
-                  <div className="text-xs font-medium text-on-surface-variant flex items-center gap-1">
-                    <MapPin className="w-3 h-3" /> {stop.distance}
-                  </div>
-                  {stop.status === 'In Progress' && (
-                    <span className="text-xs font-bold text-primary animate-pulse flex items-center gap-1">
-                      <Navigation2 className="w-3 h-3" /> Current Stop
-                    </span>
-                  )}
-                </div>
+            {stops.length === 0 ? (
+              <div className="text-center py-8 text-on-surface-variant">
+                No stops scheduled for today.
               </div>
-            ))}
+            ) : (
+              stops.map((stop, index) => (
+                <div key={stop.id} className={`p-4 rounded-xl border ${stop.status === 'Completed' ? 'border-success-teal/30 bg-success-teal/5' : stop.status === 'In Progress' ? 'border-primary shadow-md bg-primary/5' : 'border-border-standard'} transition-all`}>
+                  <div className="flex justify-between items-start mb-2">
+                    <div className="flex items-center gap-2">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white ${stop.status === 'Completed' ? 'bg-success-teal' : stop.status === 'In Progress' ? 'bg-primary' : 'bg-surface-dim text-on-surface'}`}>
+                        {stop.status === 'Completed' ? <CheckCircle className="w-4 h-4" /> : <span>{index + 1}</span>}
+                      </div>
+                      <span className={`text-xs font-bold px-2 py-1 rounded-md ${stop.type === 'Delivery' ? 'bg-info-blue/10 text-info-blue' : 'bg-warning-amber/10 text-warning-amber'}`}>
+                        {stop.type}
+                      </span>
+                    </div>
+                    <span className="text-xs font-bold text-outline flex items-center gap-1">
+                      <Clock className="w-3 h-3" /> {stop.time}
+                    </span>
+                  </div>
+                  
+                  <h4 className="font-bold text-sm text-on-surface leading-tight mb-2 mt-3">{stop.location}</h4>
+                  
+                  <div className="flex items-center justify-between mt-2 pt-2 border-t border-border-standard/50">
+                    <div className="text-xs font-medium text-on-surface-variant flex items-center gap-1">
+                      <MapPin className="w-3 h-3" /> {stop.distance}
+                    </div>
+                    {stop.status === 'In Progress' && (
+                      <span className="text-xs font-bold text-primary animate-pulse flex items-center gap-1">
+                        <Navigation2 className="w-3 h-3" /> Current Stop
+                      </span>
+                    )}
+                    {stop.status === 'Pending' && (
+                      <button 
+                        onClick={() => handleCompleteStop(stop.id)}
+                        className="text-xs font-bold text-primary hover:underline"
+                      >
+                        Mark Complete
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>

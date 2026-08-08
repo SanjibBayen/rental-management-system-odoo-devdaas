@@ -1,10 +1,27 @@
 import { LayoutGrid, List, Filter } from 'lucide-react';
+import { useProducts } from '../hooks/useProducts';
 
 export default function CatalogHeader() {
+  const { products, pagination, category, isLoading } = useProducts();
+
+  // Fallback values while loading
+  const from = pagination?.from || 1;
+  const to = pagination?.to || 0;
+  const total = pagination?.total || 0;
+  const displayCategory = category || 'All Products';
+
   return (
     <div className="flex flex-col sm:flex-row justify-between items-center bg-white p-4 rounded-xl border border-border-standard shadow-sm gap-4">
       <div className="font-medium text-sm text-on-surface-variant self-start sm:self-center">
-        Showing <span className="font-bold text-on-surface">1-9</span> of <span className="font-bold text-on-surface">24</span> products in <span className="font-bold text-on-surface">"Electronics"</span>
+        {isLoading ? (
+          <span>Loading products...</span>
+        ) : (
+          <>
+            Showing <span className="font-bold text-on-surface">{from}-{to}</span> of{' '}
+            <span className="font-bold text-on-surface">{total}</span> products in{' '}
+            <span className="font-bold text-on-surface">"{displayCategory}"</span>
+          </>
+        )}
       </div>
       <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto">
         <button className="lg:hidden flex items-center gap-2 bg-surface-muted/50 px-3 py-1.5 rounded-lg border border-border-standard text-sm font-semibold text-on-surface hover:bg-surface-muted transition-colors">

@@ -8,20 +8,39 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const submitRef = useRef<HTMLButtonElement | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isLoginView) {
-      login(email);
-    } else {
-      signup(name, email);
+    setError(null);
+    setIsLoading(true);
+
+    try {
+      if (isLoginView) {
+        await login(email, password);
+        // User will be redirected by the AuthProvider
+      } else {
+        await signup(name, email, password);
+        // After signup, user should verify OTP
+        alert('Account created! Please check your email for the OTP verification code.');
+        // You can redirect to OTP verification page here
+      }
+    } catch (err: any) {
+      setError(err.message || 'Authentication failed. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const autofillDemo = (demoEmail: string) => {
     setEmail(demoEmail);
     setPassword('password123');
+    // Auto-submit after a short delay
+    setTimeout(() => {
+      submitRef.current?.click();
+    }, 500);
   };
 
   return (
@@ -112,6 +131,12 @@ export default function Login() {
             {isLoginView ? 'Enter your credentials to access your portal.' : 'Sign up to start renting professional equipment.'}
           </p>
 
+          {error && (
+            <div className="mb-4 p-3 bg-danger-red/10 border border-danger-red/20 rounded-lg text-danger-red text-sm font-medium">
+              {error}
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-5">
             {!isLoginView && (
               <div className="animate-[fadeInUp_0.3s_ease-out]">
@@ -175,9 +200,10 @@ export default function Login() {
               <button
                 type="submit"
                 ref={submitRef}
-                className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition hover:bg-primary/90"
+                disabled={isLoading}
+                className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isLoginView ? 'Sign In' : 'Create Account'}
+                {isLoading ? 'Processing...' : (isLoginView ? 'Sign In' : 'Create Account')}
                 <ArrowRight className="w-4 h-4" />
               </button>
             </div>

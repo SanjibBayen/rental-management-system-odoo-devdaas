@@ -1,11 +1,27 @@
 import React from 'react';
 import { ArrowRight, ShieldCheck, Clock, PenTool, Star, Zap } from 'lucide-react';
-import { products } from '../../data';
+import { useProducts } from '../../hooks/useProducts';
 import ProductCard from '../../components/ProductCard';
+import { Product } from '../../types';
 
-export default function Home({ setActiveView, setSelectedProductId }: { setActiveView: (v: string) => void, setSelectedProductId: (id: string) => void }) {
-  const featured = products.slice(0, 3);
+export default function Home({ 
+  setActiveView, 
+  setSelectedProductId 
+}: { 
+  setActiveView: (v: string) => void, 
+  setSelectedProductId: (id: string) => void 
+}) {
+  const { products, isLoading } = useProducts();
   
+  // Get first 3 products as featured (or top-rated)
+  const featured = React.useMemo(() => {
+    if (!products || products.length === 0) return [];
+    // Sort by rating and take top 3
+    return [...products]
+      .sort((a, b) => b.rating - a.rating)
+      .slice(0, 3);
+  }, [products]);
+
   return (
     <div className="w-full">
       {/* Hero Section */}
@@ -95,14 +111,31 @@ export default function Home({ setActiveView, setSelectedProductId }: { setActiv
           </button>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {featured.map(product => (
-            <div key={product.id} onClick={() => { setSelectedProductId(product.id); setActiveView('product_detail'); }} className="cursor-pointer h-full">
-              <ProductCard product={product} setActiveView={setActiveView} />
-            </div>
-          ))}
-        </div>
+        {isLoading ? (
+          <div className="flex justify-center py-12">
+            <div className="animate-pulse text-on-surface-variant">Loading featured products...</div>
+          </div>
+        ) : featured.length === 0 ? (
+          <div className="text-center py-12 text-on-surface-variant">
+            No featured products available at the moment.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {featured.map((product: Product) => (
+              <div 
+                key={product.id} 
+                onClick={() => { 
+                  setSelectedProductId(product.id); 
+                  setActiveView('product_detail'); 
+                }} 
+                className="cursor-pointer h-full"
+              >
+                <ProductCard product={product} setActiveView={setActiveView} />
+              </div>
+            ))}
+          </div>
+        )}
       </section>
     </div>
-  );  
+  );
 }
