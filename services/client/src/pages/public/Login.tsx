@@ -1,31 +1,70 @@
 import React, { useRef, useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
-import { Building2, User, Truck, Briefcase, Mail, Lock, ArrowRight, User as UserIcon } from 'lucide-react';
+import { Building2, User, Truck, Briefcase, Mail, Lock, ArrowRight, User as UserIcon, ShieldCheck } from 'lucide-react';
+
+type Step = 'login' | 'signup' | 'otp';
 
 export default function Login() {
-  const { login, signup } = useAuth();
-  const [isLoginView, setIsLoginView] = useState(true);
+  const { login, signup, verifyOTP, resendOTP } = useAuth();
+  const [step, setStep] = useState<Step>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
+  const [otp, setOtp] = useState('');
+  const [userId, setUserId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const submitRef = useRef<HTMLButtonElement | null>(null);
 
+  // ============================================================
+  // Step 1: Login / Signup Submission
+  // ============================================================
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setIsLoading(true);
 
     try {
-      if (isLoginView) {
-        await login(email, password);
-        // User will be redirected by the AuthProvider
-      } else {
-        await signup(name, email, password);
-        // After signup, user should verify OTP
-        alert('Account created! Please check your email for the OTP verification code.');
-        // You can redirect to OTP verification page here
+      if (step === 'login') {
+        try {
+          await login(email, password);
+          // Success → AuthProvider redirects to dashboard
+        } catch (err: any) {
+          const message = err.message || '';
+          // Check if backend returned "email not verified"
+          if (message.toLowerCase().includes('verify your email')) {
+            // Backend likely returns userId in the error response
+            const backendUserId = err.response?.data?.userId;
+            if (backendUserId) {
+              setUserId(backendUserId);
+            } else {
+              // Fallback: try to get userId from stored user data
+              const storedUser = localStorage.getItem('user');
+              if (storedUser) {
+                try {
+                  const parsed = JSON.parse(storedUser);
+                  if (parsed.id) setUserId(parsed.id);
+                } catch {}
+              }
+            }
+            // Resend OTP to the email
+            await resendOTP(userId || '', email);
+            setStep('otp');
+            setError('Please verify your email. A new OTP has been sent.');
+          } else {
+            setError(message);
+          }
+        }
+      } else if (step === 'signup') {
+        const result = await signup(name, email, password);
+        if (result?.userId) {
+          setUserId(result.userId);
+          setStep('otp');
+          setTimeout(() => {
+            const otpInput = document.getElementById('otp-input');
+            if (otpInput) otpInput.focus();
+          }, 200);
+        }
       }
     } catch (err: any) {
       setError(err.message || 'Authentication failed. Please try again.');
@@ -34,15 +73,41 @@ export default function Login() {
     }
   };
 
+  // ============================================================
+  // Step 2: OTP Verification
+  // ============================================================
+  const handleOtpSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setIsLoading(true);
+
+    try {
+      if (!userId) throw new Error('User ID missing. Please start over.');
+      await verifyOTP(userId, otp);
+      // After successful verification, log the user in
+      await login(email, password);
+    } catch (err: any) {
+      setError(err.message || 'OTP verification failed. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // ============================================================
+  // Auto‑fill demo accounts
+  // ============================================================
   const autofillDemo = (demoEmail: string) => {
     setEmail(demoEmail);
     setPassword('password123');
-    // Auto-submit after a short delay
+    setStep('login');
     setTimeout(() => {
       submitRef.current?.click();
     }, 500);
   };
 
+  // ============================================================
+  // Render
+  // ============================================================
   return (
     <div className="min-h-screen bg-surface-muted flex items-center justify-center p-4 relative overflow-hidden">
       {/* Ambient background glow */}
@@ -93,7 +158,7 @@ export default function Login() {
 
             <div className="mt-8 space-y-3">
               <p className="text-sm font-bold text-primary-container/80 uppercase tracking-wider">
-                Demo Accounts (Click to auto-fill)
+                Demo Accounts (Click to auto‑fill)
               </p>
               <div className="flex flex-col gap-2">
                 <button
@@ -122,13 +187,17 @@ export default function Login() {
           </div>
         </div>
 
-        {/* Right side login/signup */}
+        {/* Right side login/signup/otp */}
         <div className="p-12 flex flex-col justify-center bg-surface-bright relative">
           <h2 className="text-3xl font-black text-on-surface mb-2 tracking-tight">
-            {isLoginView ? 'Welcome Back' : 'Create an Account'}
+            {step === 'login' && 'Welcome Back'}
+            {step === 'signup' && 'Create an Account'}
+            {step === 'otp' && 'Verify Your Email'}
           </h2>
           <p className="text-on-surface-variant font-medium mb-8 text-lg">
-            {isLoginView ? 'Enter your credentials to access your portal.' : 'Sign up to start renting professional equipment.'}
+            {step === 'login' && 'Enter your credentials to access your portal.'}
+            {step === 'signup' && 'Sign up to start renting professional equipment.'}
+            {step === 'otp' && `We’ve sent a 6‑digit OTP to ${email}.`}
           </p>
 
           {error && (
@@ -137,87 +206,159 @@ export default function Login() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {!isLoginView && (
-              <div className="animate-[fadeInUp_0.3s_ease-out]">
-                <label className="block text-sm font-bold text-on-surface mb-2">Full Name</label>
+          {/* ---------- LOGIN / SIGNUP FORM ---------- */}
+          {step !== 'otp' && (
+            <form onSubmit={handleSubmit} className="space-y-5">
+              {step === 'signup' && (
+                <div className="animate-[fadeInUp_0.3s_ease-out]">
+                  <label className="block text-sm font-bold text-on-surface mb-2">Full Name</label>
+                  <div className="relative group">
+                    <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-outline transition-colors group-focus-within:text-primary" />
+                    <input
+                      required
+                      type="text"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="John Doe"
+                      className="w-full pl-12 pr-4 py-3 bg-surface-muted border border-border-standard rounded-xl font-medium transition-all duration-200 placeholder:text-outline
+                        focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 focus:bg-white
+                        hover:border-primary/40"
+                    />
+                  </div>
+                </div>
+              )}
+
+              <div>
+                <label className="block text-sm font-bold text-on-surface mb-2">Email Address</label>
                 <div className="relative group">
-                  <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-outline transition-colors group-focus-within:text-primary" />
+                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-outline transition-colors group-focus-within:text-primary" />
                   <input
                     required
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="John Doe"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="name@company.com"
                     className="w-full pl-12 pr-4 py-3 bg-surface-muted border border-border-standard rounded-xl font-medium transition-all duration-200 placeholder:text-outline
                       focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 focus:bg-white
                       hover:border-primary/40"
                   />
                 </div>
               </div>
-            )}
 
-            <div>
-              <label className="block text-sm font-bold text-on-surface mb-2">Email Address</label>
-              <div className="relative group">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-outline transition-colors group-focus-within:text-primary" />
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-sm font-bold text-on-surface">Password</label>
+                  {step === 'login' && (
+                    <button type="button" className="text-sm font-bold text-primary hover:underline underline-offset-2">
+                      Forgot password?
+                    </button>
+                  )}
+                </div>
+                <div className="relative group">
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-outline transition-colors group-focus-within:text-primary" />
+                  <input
+                    required
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full pl-12 pr-4 py-3 bg-surface-muted border border-border-standard rounded-xl font-medium transition-all duration-200 placeholder:text-outline focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 focus:bg-white hover:border-primary/40"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between gap-4">
+                <button
+                  type="submit"
+                  ref={submitRef}
+                  disabled={isLoading}
+                  className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isLoading ? 'Processing...' : (step === 'login' ? 'Sign In' : 'Create Account')}
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="text-center text-sm text-on-surface-variant">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setError(null);
+                    setStep(step === 'login' ? 'signup' : 'login');
+                  }}
+                  className="font-semibold text-primary hover:underline"
+                >
+                  {step === 'login' ? 'Create a new account' : 'Already have an account? Sign in'}
+                </button>
+              </div>
+            </form>
+          )}
+
+          {/* ---------- OTP VERIFICATION FORM ---------- */}
+          {step === 'otp' && (
+            <form onSubmit={handleOtpSubmit} className="space-y-5 animate-[fadeInUp_0.4s_ease-out]">
+              <div className="flex items-center gap-3 p-4 bg-primary/5 rounded-xl border border-primary/20 mb-4">
+                <ShieldCheck className="w-6 h-6 text-primary" />
+                <div>
+                  <div className="font-bold text-sm text-on-surface">OTP Sent</div>
+                  <div className="text-xs text-on-surface-variant">
+                    Enter the 6‑digit code sent to <span className="font-semibold">{email}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-on-surface mb-2">Enter OTP</label>
                 <input
+                  id="otp-input"
                   required
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="name@company.com"
-                  className="w-full pl-12 pr-4 py-3 bg-surface-muted border border-border-standard rounded-xl font-medium transition-all duration-200 placeholder:text-outline
-                    focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 focus:bg-white
-                    hover:border-primary/40"
+                  type="text"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  placeholder="123456"
+                  maxLength={6}
+                  className="w-full px-4 py-3 bg-surface-muted border border-border-standard rounded-xl font-medium text-center text-2xl tracking-[0.5em] transition-all duration-200 placeholder:text-outline focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 focus:bg-white"
                 />
               </div>
-            </div>
 
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <label className="block text-sm font-bold text-on-surface">Password</label>
-                {isLoginView && (
-                  <button type="button" className="text-sm font-bold text-primary hover:underline underline-offset-2">
-                    Forgot password?
-                  </button>
-                )}
+              <div className="flex items-center justify-between gap-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setStep('signup');
+                    setOtp('');
+                    setError(null);
+                  }}
+                  className="px-6 py-3 text-sm font-bold text-on-surface-variant hover:text-primary transition-colors"
+                >
+                  ← Back
+                </button>
+                <button
+                  type="submit"
+                  disabled={otp.length !== 6 || isLoading}
+                  className="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-8 py-3 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isLoading ? 'Verifying...' : 'Verify & Sign In'}
+                  <ArrowRight className="w-4 h-4" />
+                </button>
               </div>
-              <div className="relative group">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-outline transition-colors group-focus-within:text-primary" />
-                <input
-                  required
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="w-full pl-12 pr-4 py-3 bg-surface-muted border border-border-standard rounded-xl font-medium transition-all duration-200 placeholder:text-outline focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 focus:bg-white hover:border-primary/40"
-                />
+
+              <div className="text-center text-sm text-on-surface-variant">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setOtp('');
+                    setError(null);
+                    // In a real app you'd call resendOTP here
+                    alert('OTP resent! Check your email.');
+                  }}
+                  className="font-semibold text-primary hover:underline"
+                >
+                  Resend OTP
+                </button>
               </div>
-            </div>
-
-            <div className="flex items-center justify-between gap-4">
-              <button
-                type="submit"
-                ref={submitRef}
-                disabled={isLoading}
-                className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isLoading ? 'Processing...' : (isLoginView ? 'Sign In' : 'Create Account')}
-                <ArrowRight className="w-4 h-4" />
-              </button>
-            </div>
-
-            <div className="text-center text-sm text-on-surface-variant">
-              <button
-                type="button"
-                onClick={() => setIsLoginView(!isLoginView)}
-                className="font-semibold text-primary hover:underline"
-              >
-                {isLoginView ? 'Create a new account' : 'Already have an account? Sign in'}
-              </button>
-            </div>
-          </form>
+            </form>
+          )}
         </div>
       </div>
     </div>

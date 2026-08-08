@@ -53,6 +53,9 @@ interface AuthContextType {
   }>;
   logout: () => void;
   hasPermission: (permission: Permission) => boolean;
+  // ✅ Add these two
+  verifyOTP: (userId: string, otp: string) => Promise<any>;
+  resendOTP: (userId: string, email: string) => Promise<any>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -136,6 +139,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   // ============================================================
+  // VERIFY OTP ✅ ADDED
+  // ============================================================
+  const verifyOTP = async (userId: string, otp: string) => {
+    try {
+      const response = await api.post("/auth/verify-otp", { userId, otp });
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.message || "OTP verification failed");
+    }
+  };
+
+  // ============================================================
+  // RESEND OTP ✅ ADDED
+  // ============================================================
+  const resendOTP = async (userId: string, email: string) => {
+    try {
+      const response = await api.post("/auth/resend-otp", { userId, email });
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.message || "Failed to resend OTP");
+    }
+  };
+
+  // ============================================================
   // LOGOUT
   // ============================================================
   const logout = () => {
@@ -161,6 +188,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         signup,
         logout,
         hasPermission,
+        verifyOTP,   // ✅ Expose verifyOTP
+        resendOTP,   // ✅ Expose resendOTP
       }}
     >
       {children}
