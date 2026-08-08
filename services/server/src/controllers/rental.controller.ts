@@ -18,7 +18,7 @@ export class RentalController {
   async getById(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const rental = await rentalService.findById(id);
+      const rental = await rentalService.getById(id);
 
       if (!rental) {
         return res.status(404).json({ error: 'Rental not found' });
