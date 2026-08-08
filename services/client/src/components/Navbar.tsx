@@ -148,6 +148,6 @@ export default function Navbar({ activeView, setActiveView }: NavbarProps) {
         </div>
       </div>
     </header>
-  );  
+  );    
 }
  

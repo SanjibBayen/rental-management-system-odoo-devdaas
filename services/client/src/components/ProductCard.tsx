@@ -84,6 +84,6 @@ export default function ProductCard({ product, setActiveView }: ProductCardProps
         </div>
       </div>
     </div>
-  );
+  );    
 }
-   
+      
