@@ -57,7 +57,7 @@ export default function Cart({ setActiveView }: { setActiveView: (view: string) 
         <p className="text-on-surface-variant mb-8 max-w-md mx-auto">Looks like you haven't added anything to your cart yet. Explore our top-tier gear today.</p>
         <button 
           onClick={() => setActiveView('catalog')}
-          className="bg-primary text-white font-bold px-8 py-3 rounded-xl hover:bg-opacity-90 transition-opacity shadow-md"
+          className="bg-primary text-white font-bold px-8 py-3 rounded-xl hover:bg-opacity-90 transition-opacity shadow-sm"
         >
           Browse Catalog
         </button>
@@ -67,7 +67,7 @@ export default function Cart({ setActiveView }: { setActiveView: (view: string) 
 
   return (
     <div className="w-full max-w-7xl mx-auto px-margin-desktop py-8 animate-fade-in-up">
-      <h1 className="text-3xl font-black text-on-surface tracking-tight mb-8">Checkout</h1>
+      <h1 className="text-2xl font-bold text-on-surface tracking-tight mb-8">Checkout</h1>
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-4">
@@ -76,7 +76,7 @@ export default function Cart({ setActiveView }: { setActiveView: (view: string) 
               <ShieldCheck className="w-6 h-6" />
             </div>
             <div>
-              <h3 className="font-bold text-lg mb-1 text-on-surface">Rental Agreement & Insurance</h3>
+              <h3 className="font-bold text-base mb-1 text-on-surface">Rental Agreement & Insurance</h3>
               <p className="text-sm text-on-surface-variant leading-relaxed">
                 By proceeding, you agree to our standard terms of service. A temporary hold will be placed on your card for the deposit amount until the equipment is safely returned.
               </p>

@@ -6,6 +6,7 @@ import Modal from '../../components/Modal';
 export default function Profile() {
   const { user } = useAuth();
   const [isEditOpen, setIsEditOpen] = useState(false);
+  const [forgotPassMode, setForgotPassMode] = useState(false);
   
   if (!user) return null;
 
@@ -97,26 +98,77 @@ export default function Profile() {
       </div>
 
       <Modal isOpen={isEditOpen} onClose={() => setIsEditOpen(false)} title="Edit Profile">
-        <form onSubmit={handleUpdateProfile} className="space-y-4">
-          <div>
-            <label className="block text-sm font-bold text-on-surface mb-1">Full Name</label>
-            <input required type="text" defaultValue={user.name} className="w-full px-4 py-2 border border-border-standard rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none" />
+        <form onSubmit={handleUpdateProfile} className="space-y-6">
+          {/* Profile Picture Update Section */}
+          <div className="flex items-center gap-4">
+            <div className="w-16 h-16 bg-primary text-white rounded-full flex items-center justify-center text-2xl font-black shadow-inner overflow-hidden relative group">
+              <span className="group-hover:opacity-0 transition-opacity">{user.name.charAt(0)}</span>
+              <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                <Settings className="w-5 h-5 text-white" />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-bold text-on-surface mb-1">Profile Picture</label>
+              <button type="button" className="text-sm font-bold text-primary hover:underline px-3 py-1.5 bg-primary/10 rounded-lg">Upload New Image</button>
+            </div>
           </div>
-          <div>
-            <label className="block text-sm font-bold text-on-surface mb-1">Email Address</label>
-            <input required type="email" defaultValue={user.email} className="w-full px-4 py-2 border border-border-standard rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none" />
+
+          <div className="space-y-4 border-b border-border-standard pb-6">
+            <div>
+              <label className="block text-sm font-bold text-on-surface mb-1">Full Name</label>
+              <input required type="text" defaultValue={user.name} className="w-full px-4 py-2 border border-border-standard rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" />
+            </div>
+            <div>
+              <label className="block text-sm font-bold text-on-surface mb-1">Location</label>
+              <input required type="text" defaultValue="Odoo Headquarters, CA" className="w-full px-4 py-2 border border-border-standard rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" />
+            </div>
           </div>
-          <div>
-            <label className="block text-sm font-bold text-on-surface mb-1">Phone Number</label>
-            <input required type="text" defaultValue="+1 (555) 123-4567" className="w-full px-4 py-2 border border-border-standard rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none" />
+
+          {/* Change Password Section */}
+          <div className="space-y-4">
+            <div className="flex justify-between items-center mb-2">
+              <h4 className="font-bold text-on-surface">Change Password</h4>
+              <button 
+                type="button" 
+                onClick={() => setForgotPassMode(!forgotPassMode)}
+                className="text-xs font-bold text-primary hover:underline"
+              >
+                {forgotPassMode ? 'Cancel Reset' : 'Forgot Password?'}
+              </button>
+            </div>
+            
+            {forgotPassMode ? (
+              <div className="bg-primary/5 p-4 rounded-xl border border-primary/20 space-y-3">
+                <p className="text-sm font-medium text-on-surface-variant mb-2">
+                  An OTP has been sent to your email <strong>{user.email}</strong>.
+                </p>
+                <div>
+                  <label className="block text-xs font-bold text-on-surface-variant mb-1">Enter OTP</label>
+                  <input type="text" placeholder="123456" maxLength={6} className="w-full px-4 py-2 border border-border-standard rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all text-sm tracking-widest text-center" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-on-surface-variant mb-1">New Password</label>
+                  <input type="password" placeholder="••••••••" className="w-full px-4 py-2 border border-border-standard rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all text-sm" />
+                </div>
+                <button type="button" className="w-full py-2 bg-primary text-white font-bold rounded-lg text-sm hover:bg-opacity-90">Verify & Reset Password</button>
+              </div>
+            ) : (
+              <>
+                <div>
+                  <label className="block text-xs font-bold text-on-surface-variant mb-1">Current Password</label>
+                  <input type="password" placeholder="••••••••" className="w-full px-4 py-2 border border-border-standard rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all text-sm" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-on-surface-variant mb-1">New Password</label>
+                  <input type="password" placeholder="••••••••" className="w-full px-4 py-2 border border-border-standard rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all text-sm" />
+                </div>
+              </>
+            )}
           </div>
-          <div>
-            <label className="block text-sm font-bold text-on-surface mb-1">Location</label>
-            <input required type="text" defaultValue="Odoo Headquarters, CA" className="w-full px-4 py-2 border border-border-standard rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none" />
-          </div>
-          <div className="pt-4 border-t border-border-standard flex justify-end gap-3">
+
+          <div className="pt-4 flex justify-end gap-3">
             <button type="button" onClick={() => setIsEditOpen(false)} className="px-4 py-2 font-bold text-on-surface-variant hover:bg-surface-muted rounded-lg transition-colors">Cancel</button>
-            <button type="submit" className="px-6 py-2 bg-primary text-white font-bold rounded-lg hover:bg-opacity-90 transition-opacity">Save Changes</button>
+            <button type="submit" className="px-6 py-2 bg-primary text-white font-bold rounded-lg hover:bg-opacity-90 transition-opacity shadow-sm">Save Changes</button>
           </div>
         </form>
       </Modal>

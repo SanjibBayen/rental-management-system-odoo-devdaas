@@ -17,45 +17,45 @@ export default function Customers() {
     <div className="w-full max-w-7xl mx-auto px-margin-desktop py-8">
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-black text-on-surface tracking-tight">Customers</h1>
-          <p className="text-on-surface-variant font-medium mt-1">View and manage customer accounts and history.</p>
+          <h1 className="text-2xl font-bold text-on-surface tracking-tight">Customers</h1>
+          <p className="text-on-surface-variant font-medium text-sm mt-1">View and manage customer accounts and history.</p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {customers.map((customer, index) => (
-          <div key={index} className="bg-white border border-border-standard rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow">
+          <div key={index} className="bg-white border border-border-standard rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow group">
             <div className="flex justify-between items-start mb-4">
-              <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xl">
+              <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xl group-hover:scale-105 transition-transform">
                 {customer.name.charAt(0)}
               </div>
               <button 
                 onClick={() => { setSelectedCustomer(customer); setIsProfileModalOpen(true); }}
-                className="text-on-surface-variant hover:text-primary transition-colors p-2 bg-surface-muted hover:bg-primary/10 rounded-lg"
+                className="text-on-surface-variant hover:text-primary transition-colors p-1.5 hover:bg-primary/10 rounded-md"
               >
-                <ExternalLink className="w-5 h-5" />
+                <ExternalLink className="w-4 h-4" />
               </button>
             </div>
-            <h3 className="font-bold text-xl text-on-surface leading-tight">{customer.name}</h3>
-            <p className="text-outline font-medium text-sm mb-4">{customer.company}</p>
+            <h3 className="font-bold text-lg text-on-surface leading-tight truncate">{customer.name}</h3>
+            <p className="text-on-surface-variant text-sm mb-4 truncate">{customer.company}</p>
             
             <div className="space-y-2 mb-6">
-              <div className="flex items-center gap-2 text-sm text-on-surface-variant font-medium">
-                <Mail className="w-4 h-4 text-outline" /> {customer.email}
+              <div className="flex items-center gap-2 text-sm text-on-surface-variant font-medium truncate">
+                <Mail className="w-4 h-4 text-outline shrink-0" /> {customer.email}
               </div>
-              <div className="flex items-center gap-2 text-sm text-on-surface-variant font-medium">
-                <Phone className="w-4 h-4 text-outline" /> {customer.phone}
+              <div className="flex items-center gap-2 text-sm text-on-surface-variant font-medium truncate">
+                <Phone className="w-4 h-4 text-outline shrink-0" /> {customer.phone}
               </div>
             </div>
 
             <div className="flex items-center justify-between pt-4 border-t border-border-standard">
               <div>
-                <div className="text-xs text-outline font-medium">Active Rentals</div>
-                <div className="font-bold text-lg text-on-surface">{customer.activeRentals}</div>
+                <div className="text-xs text-on-surface-variant font-medium uppercase tracking-wider">Active Rentals</div>
+                <div className="font-bold text-base text-on-surface mt-0.5">{customer.activeRentals}</div>
               </div>
               <div className="text-right">
-                <div className="text-xs text-outline font-medium">Total Spent</div>
-                <div className="font-bold text-lg text-primary">{customer.totalSpent}</div>
+                <div className="text-xs text-on-surface-variant font-medium uppercase tracking-wider">Total Spent</div>
+                <div className="font-bold text-base text-primary mt-0.5">{customer.totalSpent}</div>
               </div>
             </div>
           </div>
@@ -103,4 +103,3 @@ export default function Customers() {
     </div>
   );
 }
- 

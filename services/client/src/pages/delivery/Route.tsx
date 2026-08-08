@@ -26,17 +26,17 @@ export default function Route() {
 
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
         <div>
-          <h1 className="text-3xl font-black text-on-surface tracking-tight">Today's Route</h1>
-          <p className="text-on-surface-variant font-medium mt-1">Optimized path for {stops.length} scheduled stops.</p>
+          <h1 className="text-2xl font-bold text-on-surface tracking-tight">Today's Route</h1>
+          <p className="text-on-surface-variant font-medium text-sm mt-1">Optimized path for {stops.length} scheduled stops.</p>
         </div>
         <button 
           onClick={() => {
             setIsNavigating(true);
             setTimeout(() => setIsNavigating(false), 5000);
           }}
-          className={`px-6 py-3 rounded-xl font-bold flex items-center gap-2 transition-all shadow-md ${isNavigating ? 'bg-surface-muted text-on-surface-variant cursor-not-allowed' : 'bg-primary text-white hover:bg-opacity-90 hover:shadow-lg'}`}
+          className={`px-5 py-2.5 rounded-lg font-bold text-sm flex items-center gap-2 transition-all shadow-sm ${isNavigating ? 'bg-surface-muted text-on-surface-variant cursor-not-allowed' : 'bg-primary text-white hover:bg-opacity-90 active:scale-95'}`}
         >
-          <Navigation2 className="w-5 h-5" /> {isNavigating ? 'Navigating...' : 'Start Navigation'}
+          <Navigation2 className="w-4 h-4" /> {isNavigating ? 'Navigating...' : 'Start Navigation'}
         </button>
       </div>
 
