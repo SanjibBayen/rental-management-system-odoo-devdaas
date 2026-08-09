@@ -22,9 +22,6 @@ const hashOTP = (otp: string): string => {
 };
 
 export class AuthController {
-  // ============================================================
-  // 1. REGISTER
-  // ============================================================
   async register(req: Request, res: Response): Promise<void> {
     try {
       const { email, password, full_name, phone, role } = req.body;
