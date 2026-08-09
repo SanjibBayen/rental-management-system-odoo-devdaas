@@ -3,15 +3,8 @@ import { Search, ChevronDown, ChevronUp, SlidersHorizontal, X } from 'lucide-rea
 import { useProducts } from '../hooks/useProducts';
 
 export default function Sidebar() {
-  const { 
-    categories, 
-    brands, 
-    filterProducts, 
-    activeFilters,
-    isLoading,
-  } = useProducts();
+  const { categories, brands, filterProducts, activeFilters, isLoading } = useProducts();
 
-  // Local state for UI interactions
   const [priceValue, setPriceValue] = useState(activeFilters.maxPrice);
   const [priceInputValue, setPriceInputValue] = useState(String(activeFilters.maxPrice));
   const [categorySearch, setCategorySearch] = useState('');
@@ -21,11 +14,9 @@ export default function Sidebar() {
   const [showAllBrands, setShowAllBrands] = useState(false);
   
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const previousFiltersRef = useRef(activeFilters);
   const maxPrice = 10000;
   const minPrice = 0;
 
-  // Count active filters
   const activeFilterCount = useMemo(() => {
     let count = 0;
     if (activeFilters.categories?.length > 0) count += activeFilters.categories.length;
@@ -35,24 +26,19 @@ export default function Sidebar() {
     return count;
   }, [activeFilters, maxPrice]);
 
-  // Debounced price change handler
   const handlePriceChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const value = Number(e.target.value);
     setPriceValue(value);
     setPriceInputValue(String(value));
 
-    // Clear previous timer
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
     }
-
-    // Debounce the actual filter update
     debounceTimerRef.current = setTimeout(() => {
       filterProducts({ ...activeFilters, maxPrice: value });
     }, 300);
   }, [activeFilters, filterProducts]);
 
-  // Handle direct price input
   const handlePriceInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const rawValue = e.target.value.replace(/[^0-9]/g, '');
     setPriceInputValue(rawValue);
@@ -76,7 +62,6 @@ export default function Sidebar() {
     }
   }, [handlePriceInputBlur]);
 
-  // Category toggle handler
   const handleCategoryToggle = useCallback((category: string) => {
     const newCategories = activeFilters.categories?.includes(category)
       ? activeFilters.categories.filter((c: string) => c !== category)
@@ -84,7 +69,6 @@ export default function Sidebar() {
     filterProducts({ ...activeFilters, categories: newCategories });
   }, [activeFilters, filterProducts]);
 
-  // Brand toggle handler
   const handleBrandToggle = useCallback((brand: string) => {
     const newBrands = activeFilters.brands?.includes(brand)
       ? activeFilters.brands.filter((b: string) => b !== brand)
@@ -92,12 +76,10 @@ export default function Sidebar() {
     filterProducts({ ...activeFilters, brands: newBrands });
   }, [activeFilters, filterProducts]);
 
-  // Duration change handler
   const handleDurationChange = useCallback((duration: string) => {
     filterProducts({ ...activeFilters, duration });
   }, [activeFilters, filterProducts]);
 
-  // Clear all filters
   const clearAllFilters = useCallback(() => {
     const defaultFilters = {
       categories: [],
@@ -110,7 +92,6 @@ export default function Sidebar() {
     filterProducts(defaultFilters);
   }, [filterProducts, maxPrice]);
 
-  // Toggle section collapse
   const toggleSection = useCallback((section: string) => {
     setCollapsedSections(prev => ({
       ...prev,
@@ -118,7 +99,6 @@ export default function Sidebar() {
     }));
   }, []);
 
-  // Filter categories based on search
   const filteredCategories = useMemo(() => {
     if (!categories) return [];
     const filtered = categories.filter(cat => 
@@ -127,7 +107,6 @@ export default function Sidebar() {
     return showAllCategories ? filtered : filtered.slice(0, 5);
   }, [categories, categorySearch, showAllCategories]);
 
-  // Filter brands based on search
   const filteredBrands = useMemo(() => {
     if (!brands) return [];
     const filtered = brands.filter(brand => 
@@ -136,7 +115,6 @@ export default function Sidebar() {
     return showAllBrands ? filtered : filtered.slice(0, 5);
   }, [brands, brandSearch, showAllBrands]);
 
-  // Format price with Indian number system
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
@@ -145,7 +123,6 @@ export default function Sidebar() {
     }).format(price);
   };
 
-  // Cleanup debounce timer
   useEffect(() => {
     return () => {
       if (debounceTimerRef.current) {
@@ -157,7 +134,6 @@ export default function Sidebar() {
   return (
     <aside className="hidden lg:block col-span-1 space-y-6">
       <div className="bg-white border border-border-standard p-6 rounded-xl shadow-sm sticky top-24">
-        {/* Header */}
         <div className="flex justify-between items-center mb-6 pb-4 border-b border-border-standard">
           <div className="flex items-center gap-2">
             <SlidersHorizontal className="w-5 h-5 text-primary" />
@@ -172,7 +148,6 @@ export default function Sidebar() {
             <button 
               onClick={clearAllFilters}
               className="text-primary font-medium text-sm hover:underline flex items-center gap-1"
-              aria-label="Clear all filters"
             >
               <X className="w-4 h-4" />
               Clear All
@@ -180,7 +155,6 @@ export default function Sidebar() {
           )}
         </div>
 
-        {/* Active Filters Display */}
         {activeFilterCount > 0 && (
           <div className="mb-6 flex flex-wrap gap-2">
             {activeFilters.categories?.map((cat: string) => (
@@ -192,7 +166,6 @@ export default function Sidebar() {
                 <button
                   onClick={() => handleCategoryToggle(cat)}
                   className="hover:bg-primary/20 rounded-full p-0.5"
-                  aria-label={`Remove ${cat} filter`}
                 >
                   <X className="w-3 h-3" />
                 </button>
@@ -207,7 +180,6 @@ export default function Sidebar() {
                 <button
                   onClick={() => handleBrandToggle(brand)}
                   className="hover:bg-primary/20 rounded-full p-0.5"
-                  aria-label={`Remove ${brand} filter`}
                 >
                   <X className="w-3 h-3" />
                 </button>
@@ -219,7 +191,6 @@ export default function Sidebar() {
                 <button
                   onClick={() => handleDurationChange('day')}
                   className="hover:bg-primary/20 rounded-full p-0.5"
-                  aria-label="Remove duration filter"
                 >
                   <X className="w-3 h-3" />
                 </button>
@@ -235,7 +206,6 @@ export default function Sidebar() {
                     filterProducts({ ...activeFilters, maxPrice });
                   }}
                   className="hover:bg-primary/20 rounded-full p-0.5"
-                  aria-label="Remove price filter"
                 >
                   <X className="w-3 h-3" />
                 </button>
@@ -244,7 +214,6 @@ export default function Sidebar() {
           </div>
         )}
 
-        {/* Category Filter */}
         <div className="mb-6">
           <button 
             onClick={() => toggleSection('category')}
@@ -263,7 +232,6 @@ export default function Sidebar() {
           
           {!collapsedSections.category && (
             <>
-              {/* Category Search */}
               <div className="relative mb-3">
                 <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-outline" />
                 <input
@@ -272,7 +240,6 @@ export default function Sidebar() {
                   value={categorySearch}
                   onChange={(e) => setCategorySearch(e.target.value)}
                   className="w-full pl-8 pr-3 py-2 text-sm border border-border-standard rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
-                  aria-label="Search categories"
                 />
               </div>
 
@@ -286,7 +253,7 @@ export default function Sidebar() {
                   ))}
                 </div>
               ) : filteredCategories.length > 0 ? (
-                <ul className="space-y-2 font-medium text-sm text-on-surface-variant" role="group" aria-label="Category filters">
+                <ul className="space-y-2 font-medium text-sm text-on-surface-variant">
                   {filteredCategories.map((category) => (
                     <li key={category}>
                       <label className="flex items-center gap-3 cursor-pointer hover:text-primary transition-colors group">
@@ -295,14 +262,12 @@ export default function Sidebar() {
                           onChange={() => handleCategoryToggle(category)}
                           className="rounded border-outline text-primary focus:ring-primary w-4 h-4 accent-primary cursor-pointer"
                           type="checkbox"
-                          aria-label={`Filter by ${category}`}
                         />
                         <span className="flex-1">{category}</span>
                       </label>
                     </li>
                   ))}
                   
-                  {/* Show More/Less */}
                   {categories && categories.length > 5 && !categorySearch && (
                     <li>
                       <button
@@ -326,7 +291,6 @@ export default function Sidebar() {
           )}
         </div>
 
-        {/* Brand Filter */}
         <div className="pt-6 border-t border-border-standard mb-6">
           <button 
             onClick={() => toggleSection('brand')}
@@ -345,7 +309,6 @@ export default function Sidebar() {
           
           {!collapsedSections.brand && (
             <>
-              {/* Brand Search */}
               <div className="relative mb-3">
                 <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-outline" />
                 <input
@@ -354,7 +317,6 @@ export default function Sidebar() {
                   value={brandSearch}
                   onChange={(e) => setBrandSearch(e.target.value)}
                   className="w-full pl-8 pr-3 py-2 text-sm border border-border-standard rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
-                  aria-label="Search brands"
                 />
               </div>
 
@@ -368,7 +330,7 @@ export default function Sidebar() {
                   ))}
                 </div>
               ) : filteredBrands.length > 0 ? (
-                <ul className="space-y-2 font-medium text-sm text-on-surface-variant" role="group" aria-label="Brand filters">
+                <ul className="space-y-2 font-medium text-sm text-on-surface-variant">
                   {filteredBrands.map((brand) => (
                     <li key={brand}>
                       <label className="flex items-center gap-3 cursor-pointer hover:text-primary transition-colors group">
@@ -377,14 +339,12 @@ export default function Sidebar() {
                           onChange={() => handleBrandToggle(brand)}
                           className="rounded border-outline text-primary focus:ring-primary w-4 h-4 accent-primary cursor-pointer"
                           type="checkbox"
-                          aria-label={`Filter by ${brand}`}
                         />
                         <span className="flex-1">{brand}</span>
                       </label>
                     </li>
                   ))}
                   
-                  {/* Show More/Less */}
                   {brands && brands.length > 5 && !brandSearch && (
                     <li>
                       <button
@@ -408,7 +368,6 @@ export default function Sidebar() {
           )}
         </div>
 
-        {/* Duration Filter */}
         <div className="pt-6 border-t border-border-standard mb-6">
           <button 
             onClick={() => toggleSection('duration')}
@@ -426,7 +385,7 @@ export default function Sidebar() {
           </button>
           
           {!collapsedSections.duration && (
-            <div className="flex flex-wrap gap-2" role="group" aria-label="Duration filters">
+            <div className="flex flex-wrap gap-2">
               {['Hour', 'Day', 'Week', 'Month'].map((duration) => (
                 <button
                   key={duration}
@@ -436,7 +395,6 @@ export default function Sidebar() {
                       ? 'bg-primary text-white border-primary shadow-sm'
                       : 'border-border-standard text-on-surface hover:border-primary hover:text-primary hover:bg-primary/5'
                   }`}
-                  aria-pressed={activeFilters.duration === duration.toLowerCase()}
                 >
                   {duration}
                 </button>
@@ -445,7 +403,6 @@ export default function Sidebar() {
           )}
         </div>
 
-        {/* Price Range Filter */}
         <div className="pt-6 border-t border-border-standard">
           <button 
             onClick={() => toggleSection('price')}
@@ -464,7 +421,6 @@ export default function Sidebar() {
           
           {!collapsedSections.price && (
             <div className="px-1">
-              {/* Price Input */}
               <div className="flex items-center gap-2 mb-4">
                 <span className="text-xs text-outline">Max:</span>
                 <div className="relative flex-1">
@@ -476,12 +432,10 @@ export default function Sidebar() {
                     onBlur={handlePriceInputBlur}
                     onKeyDown={handlePriceInputKeyDown}
                     className="w-full pl-8 pr-3 py-1.5 text-sm border border-border-standard rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary text-right font-medium"
-                    aria-label="Maximum price"
                   />
                 </div>
               </div>
 
-              {/* Price Slider */}
               <div className="relative">
                 <input
                   className="w-full appearance-none bg-transparent cursor-pointer
@@ -513,12 +467,7 @@ export default function Sidebar() {
                   type="range"
                   value={priceValue}
                   onChange={handlePriceChange}
-                  aria-label="Price range slider"
-                  aria-valuemin={minPrice}
-                  aria-valuemax={maxPrice}
-                  aria-valuenow={priceValue}
                 />
-                {/* Custom track fill */}
                 <div 
                   className="absolute top-1/2 left-0 h-2 bg-primary/20 rounded-full pointer-events-none"
                   style={{ 

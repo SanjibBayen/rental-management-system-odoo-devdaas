@@ -10,7 +10,6 @@ export interface RentalRecord {
   product_image?: string;
   end_date?: string;
   total_amount?: number;
-  totalAmount?: number;
   [key: string]: any;
 }
 
@@ -63,9 +62,7 @@ export function useRentals(options: UseRentalsOptions = {}) {
 
       setRentals(normalized);
     } catch (err) {
-      setError(
-        err instanceof Error ? err : new Error("Failed to load rentals"),
-      );
+      setError(err instanceof Error ? err : new Error("Failed to load rentals"));
       setRentals([]);
     } finally {
       setIsLoading(false);
@@ -92,27 +89,14 @@ export function useRentals(options: UseRentalsOptions = {}) {
     [refetch],
   );
 
-  const approveRental = useCallback(
-    async (rentalId: string) => {
-      await api.put(`/rentals/${rentalId}/approve`);
-      await refetch();
-    },
-    [refetch],
-  );
-
   const getRentalStats = useCallback(() => {
-    const active = rentals.filter(
-      (rental) => rental.status === "active",
-    ).length;
+    const active = rentals.filter((rental) => rental.status === "active").length;
     const totalRevenue = rentals.reduce(
-      (sum, rental) => sum + (rental.total_amount ?? rental.totalAmount ?? 0),
+      (sum, rental) => sum + (rental.total_amount ?? 0),
       0,
     );
 
-    return {
-      active,
-      totalRevenue,
-    };
+    return { active, totalRevenue };
   }, [rentals]);
 
   return {
@@ -123,7 +107,6 @@ export function useRentals(options: UseRentalsOptions = {}) {
     refetch,
     updateFilters,
     returnRental,
-    approveRental,
     getRentalStats,
   };
 }

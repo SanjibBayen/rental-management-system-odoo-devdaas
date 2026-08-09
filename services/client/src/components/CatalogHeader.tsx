@@ -17,11 +17,7 @@ export default function CatalogHeader({
   onSortChange,
   onFilterClick,
 }: CatalogHeaderProps) {
-<<<<<<< HEAD
-  const { products, pagination, activeFilters, isLoading } = useProducts();
-=======
   const { pagination, category, isLoading } = useProducts();
->>>>>>> bf3bf601e0c49d74f74dedbdf4e75f59be11a47d
 
   // Validate pagination data before displaying
   const hasValidPagination =
@@ -32,11 +28,7 @@ export default function CatalogHeader({
   const from = hasValidPagination ? pagination.from : 0;
   const to = hasValidPagination ? pagination.to : 0;
   const total = hasValidPagination ? pagination.total : 0;
-<<<<<<< HEAD
-  const displayCategory = activeFilters?.categories?.[0] || 'All Products';
-=======
   const displayCategory = category || "All Products";
->>>>>>> bf3bf601e0c49d74f74dedbdf4e75f59be11a47d
 
   const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     onSortChange(e.target.value);

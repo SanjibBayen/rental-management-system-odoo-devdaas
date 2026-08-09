@@ -3,7 +3,6 @@ import { useAuth } from "../../hooks/useAuth";
 import {
   UserCircle,
   Mail,
-  Briefcase,
   Phone,
   Settings,
   MapPin,
@@ -22,7 +21,6 @@ export default function Profile() {
   const [isUpdating, setIsUpdating] = useState(false);
   const [profileData, setProfileData] = useState<any>(null);
 
-  // Fetch full profile data
   useEffect(() => {
     if (user) {
       fetchProfile();
@@ -90,8 +88,6 @@ export default function Profile() {
   const handleResetPassword = async () => {
     try {
       await api.auth.verifyOTP({ userId: user.id, otp });
-      // After OTP verification, update password
-      // You'd need a separate endpoint for password update
       alert("Password reset successfully!");
       setForgotPassMode(false);
       setOtpSent(false);
@@ -104,7 +100,6 @@ export default function Profile() {
 
   const handleChangePassword = async () => {
     try {
-      // You'd need a dedicated endpoint for password change
       alert("Password changed successfully!");
     } catch (err: any) {
       alert("Failed to change password: " + (err.message || "Unknown error"));
@@ -232,7 +227,6 @@ export default function Profile() {
         title="Edit Profile"
       >
         <form onSubmit={handleUpdateProfile} className="space-y-6">
-          {/* Profile Picture Update Section */}
           <div className="flex items-center gap-4">
             <div className="w-16 h-16 bg-primary text-white rounded-full flex items-center justify-center text-2xl font-black shadow-inner overflow-hidden relative group">
               <span className="group-hover:opacity-0 transition-opacity">
@@ -329,7 +323,6 @@ export default function Profile() {
             </div>
           </div>
 
-          {/* Change Password Section */}
           <div className="space-y-4">
             <div className="flex justify-between items-center mb-2">
               <h4 className="font-bold text-on-surface">Change Password</h4>

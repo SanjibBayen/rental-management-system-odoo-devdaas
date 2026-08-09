@@ -6,6 +6,7 @@ import {
   Download,
   ExternalLink,
   Calendar,
+  ArrowLeft,
 } from "lucide-react";
 import Modal from "../../components/Modal";
 import { useRentals } from "../../hooks/useRentals";
@@ -14,7 +15,11 @@ import { formatCurrency } from "../../utils/formatters";
 import { formatDate } from "../../utils/dateHelpers";
 import { api } from "../../utils/api";
 
-export default function MyRentals() {
+interface MyRentalsProps {
+  setActiveView?: (view: string) => void;
+}
+
+export default function MyRentals({ setActiveView }: MyRentalsProps) {
   const [isExtendModalOpen, setIsExtendModalOpen] = useState(false);
   const [selectedRental, setSelectedRental] = useState<any>(null);
   const [isDownloading, setIsDownloading] = useState(false);
@@ -29,12 +34,8 @@ export default function MyRentals() {
     const newEndDate = formData.get("newEndDate") as string;
 
     try {
-      // Call API to extend rental (you'd need a PATCH endpoint)
-      // For now, we simulate with a PUT request to update the rental
       if (selectedRental) {
         await api.rentals.extend?.(selectedRental.id, { end_date: newEndDate });
-        // If you don't have extend endpoint, you can use update
-        // await api.rentals.update(selectedRental.id, { end_date: newEndDate });
       }
       setIsExtendModalOpen(false);
       refetch();
@@ -49,8 +50,6 @@ export default function MyRentals() {
       setIsDownloading(true);
       const invoice = await api.rentals.getInvoice(rentalId);
 
-      // Create a download link for the invoice
-      // You can also generate a PDF here using a library like jsPDF
       const blob = new Blob([JSON.stringify(invoice, null, 2)], {
         type: "application/json",
       });
@@ -68,15 +67,13 @@ export default function MyRentals() {
   };
 
   const handleReturnInstructions = (rentalId: string) => {
-    // Open a modal or redirect to return instructions page
     alert(
-      `Return instructions for order #${rentalId}: Please return the item to our store by 5:00 PM on the final day.`,
+      `Return instructions for order #${rentalId}: Please return the item to our store by 5:00 PM on the final day.`
     );
   };
 
   const handleRentAgain = async (productId: string) => {
     try {
-      // Create a new rental for the same product
       await api.rentals.create({
         product_id: productId,
         user_id: user?.id || "",
@@ -84,8 +81,8 @@ export default function MyRentals() {
         end_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
           .toISOString()
           .split("T")[0],
-        total_amount: 0, // Calculated by backend
-        deposit_amount: 0, // Calculated by backend
+        total_amount: 0,
+        deposit_amount: 0,
       });
       refetch();
       alert("Rental created successfully!");
@@ -124,6 +121,17 @@ export default function MyRentals() {
 
   return (
     <div className="w-full max-w-7xl mx-auto px-margin-desktop py-8">
+      {/* Back Button */}
+      {setActiveView && (
+        <button
+          onClick={() => setActiveView("home")}
+          className="inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline mb-6 transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back to Home
+        </button>
+      )}
+
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-2xl font-bold text-on-surface tracking-tight">
@@ -174,18 +182,12 @@ export default function MyRentals() {
                 ? new Date(rental.end_date)
                 : new Date();
 
-              // Calculate days left
               const daysLeft = isActive
                 ? Math.max(
                     0,
                     Math.ceil(
-<<<<<<< HEAD
-                      (new Date(rental.endDate).getTime() - Date.now()) /
-                        (1000 * 60 * 60 * 24),
-=======
-                      (endDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24),
->>>>>>> bf3bf601e0c49d74f74dedbdf4e75f59be11a47d
-                    ),
+                      (endDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+                    )
                   )
                 : 0;
 
@@ -201,26 +203,26 @@ export default function MyRentals() {
                           isActive
                             ? "bg-success-teal/10 text-success-teal"
                             : isOverdue
-                              ? "bg-danger-red/10 text-danger-red"
-                              : isReturned
-                                ? "bg-primary/10 text-primary"
-                                : isCancelled
-                                  ? "bg-surface-muted text-on-surface-variant"
-                                  : "bg-surface-muted text-on-surface-variant"
+                            ? "bg-danger-red/10 text-danger-red"
+                            : isReturned
+                            ? "bg-primary/10 text-primary"
+                            : isCancelled
+                            ? "bg-surface-muted text-on-surface-variant"
+                            : "bg-surface-muted text-on-surface-variant"
                         }`}
                       >
                         {isActive
                           ? "Active"
                           : isOverdue
-                            ? "Overdue"
-                            : isReturned
-                              ? "Returned"
-                              : isCancelled
-                                ? "Cancelled"
-                                : "Completed"}
+                          ? "Overdue"
+                          : isReturned
+                          ? "Returned"
+                          : isCancelled
+                          ? "Cancelled"
+                          : "Completed"}
                       </div>
                       <div className="font-mono text-sm text-outline font-medium">
-                        Order #{rental.rentalNumber}
+                        Order #{rental.rental_number}
                       </div>
                     </div>
                     {isActive && (
@@ -229,8 +231,8 @@ export default function MyRentals() {
                           daysLeft <= 1
                             ? "bg-danger-red/10 text-danger-red"
                             : daysLeft <= 3
-                              ? "bg-warning-amber/10 text-warning-amber"
-                              : "bg-success-teal/10 text-success-teal"
+                            ? "bg-warning-amber/10 text-warning-amber"
+                            : "bg-success-teal/10 text-success-teal"
                         }`}
                       >
                         <Clock className="w-4 h-4" /> {daysLeft} days remaining
@@ -242,17 +244,17 @@ export default function MyRentals() {
                     <div className="w-24 h-24 bg-surface-container-low rounded-lg p-2 border border-border-standard shrink-0">
                       <img
                         src={
-                          rental.productImage ||
+                          rental.product_image ||
                           "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&q=80&w=200"
                         }
-                        alt={rental.productName}
+                        alt={rental.product_name}
                         className="w-full h-full object-contain mix-blend-multiply"
                         referrerPolicy="no-referrer"
                       />
                     </div>
                     <div className="flex-1">
                       <h3 className="font-bold text-lg text-on-surface mb-2">
-                        {rental.productName}
+                        {rental.product_name}
                       </h3>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
@@ -260,13 +262,8 @@ export default function MyRentals() {
                             Rental Period
                           </div>
                           <div className="font-bold text-sm text-on-surface">
-<<<<<<< HEAD
-                            {formatDate(rental.startDate)} -{" "}
-                            {formatDate(rental.endDate)}
-=======
                             {formatDate(rental.start_date || "")} -{" "}
                             {formatDate(rental.end_date || "")}
->>>>>>> bf3bf601e0c49d74f74dedbdf4e75f59be11a47d
                           </div>
                         </div>
                         <div>
@@ -274,11 +271,7 @@ export default function MyRentals() {
                             Total Paid
                           </div>
                           <div className="font-bold text-sm text-primary">
-<<<<<<< HEAD
-                            {formatCurrency(rental.totalAmount)}
-=======
-                            {formatCurrency(rental.total_amount ?? 0)}
->>>>>>> bf3bf601e0c49d74f74dedbdf4e75f59be11a47d
+                            {formatCurrency(rental.total_amount || 0)}
                           </div>
                         </div>
                       </div>
@@ -317,8 +310,7 @@ export default function MyRentals() {
                     {(isReturned || isOverdue) && (
                       <button
                         onClick={() =>
-                          rental.productId &&
-                          handleRentAgain(rental.productId)
+                          rental.product_id && handleRentAgain(rental.product_id)
                         }
                         className="px-4 py-2 bg-primary text-white rounded-lg text-sm font-bold hover:bg-opacity-90 transition-opacity"
                       >
@@ -391,10 +383,10 @@ export default function MyRentals() {
               />
               <div>
                 <h4 className="font-bold text-sm text-on-surface">
-                  {selectedRental.productName}
+                  {selectedRental.product_name}
                 </h4>
                 <p className="text-xs text-outline font-medium">
-                  Current end date: {formatDate(selectedRental.endDate)}
+                  Current end date: {formatDate(selectedRental.end_date)}
                 </p>
               </div>
             </div>

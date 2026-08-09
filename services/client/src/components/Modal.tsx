@@ -27,7 +27,6 @@ export default function Modal({
   const previousActiveElement = useRef<HTMLElement | null>(null);
   const scrollPosition = useRef(0);
 
-  // Size classes mapping
   const sizeClasses = {
     sm: 'max-w-sm',
     md: 'max-w-lg',
@@ -35,19 +34,15 @@ export default function Modal({
     xl: 'max-w-4xl',
   };
 
-  // Handle open/close animations
   useEffect(() => {
     if (isOpen) {
-      // Save current scroll position and active element
       scrollPosition.current = window.scrollY;
       previousActiveElement.current = document.activeElement as HTMLElement;
       
-      // Prevent body scroll and compensate for scrollbar width
       const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
       document.body.style.overflow = 'hidden';
       document.body.style.paddingRight = `${scrollbarWidth}px`;
       
-      // Trigger enter animation
       setShouldRender(true);
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
@@ -55,27 +50,22 @@ export default function Modal({
         });
       });
     } else {
-      // Trigger exit animation
       setIsAnimating(false);
     }
   }, [isOpen]);
 
-  // Handle animation end
   const handleAnimationEnd = useCallback(() => {
     if (!isOpen) {
       setShouldRender(false);
-      // Restore body styles
       document.body.style.overflow = '';
       document.body.style.paddingRight = '';
       
-      // Restore focus to previously active element
       if (previousActiveElement.current) {
         previousActiveElement.current.focus();
       }
     }
   }, [isOpen]);
 
-  // Focus trap implementation
   useEffect(() => {
     if (!isOpen || !modalRef.current) return;
 
@@ -87,7 +77,6 @@ export default function Modal({
     const firstFocusable = focusableElements[0] as HTMLElement;
     const lastFocusable = focusableElements[focusableElements.length - 1] as HTMLElement;
 
-    // Focus first element when modal opens
     if (firstFocusable) {
       firstFocusable.focus();
     } else {
@@ -116,7 +105,6 @@ export default function Modal({
     };
   }, [isOpen]);
 
-  // Handle escape key
   useEffect(() => {
     if (!isOpen || !closeOnEscape) return;
 
@@ -132,14 +120,12 @@ export default function Modal({
     };
   }, [isOpen, onClose, closeOnEscape]);
 
-  // Handle backdrop click
   const handleBackdropClick = (e: React.MouseEvent) => {
     if (closeOnBackdropClick && e.target === e.currentTarget) {
       onClose();
     }
   };
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       document.body.style.overflow = '';
@@ -152,7 +138,6 @@ export default function Modal({
 
   if (!shouldRender) return null;
 
-  // Use portal to render modal at the end of the document body
   return createPortal(
     <div
       className={`

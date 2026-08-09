@@ -6,13 +6,15 @@ import { useState } from 'react';
 import { useProducts } from '../../hooks/useProducts';
 import { Product } from '../../types';
 
+interface CustomerCatalogProps {
+  setActiveView: (view: string) => void;
+  setSelectedProductId: (id: string) => void;
+}
+
 export default function CustomerCatalog({ 
   setActiveView, 
   setSelectedProductId 
-}: { 
-  setActiveView: (view: string) => void, 
-  setSelectedProductId: (id: string) => void 
-}) {
+}: CustomerCatalogProps) {
   const { 
     products, 
     isLoading, 
@@ -23,6 +25,7 @@ export default function CustomerCatalog({
     activeFilters,
     refetch 
   } = useProducts();
+
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [sortBy, setSortBy] = useState('recommended');
 
@@ -48,7 +51,9 @@ export default function CustomerCatalog({
             onFilterClick={() => {}}
           />
           <div className="flex justify-center items-center py-12">
-            <div className="animate-pulse text-on-surface-variant">Loading products...</div>
+            <div className="animate-pulse text-on-surface-variant">
+              Loading products...
+            </div>
           </div>
         </section>
       </main>
@@ -67,15 +72,15 @@ export default function CustomerCatalog({
             onSortChange={handleSortChange}
             onFilterClick={() => {}}
           />
-          <div className="flex justify-center items-center py-12 text-danger-red">
-            Error loading products: {error.message}
+          <div className="flex flex-col items-center justify-center py-12 text-danger-red">
+            <p className="mb-4">{error.message}</p>
+            <button 
+              onClick={refetch}
+              className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-opacity-90"
+            >
+              Retry
+            </button>
           </div>
-          <button 
-            onClick={refetch}
-            className="mx-auto px-4 py-2 bg-primary text-white rounded-lg hover:bg-opacity-90"
-          >
-            Retry
-          </button>
         </section>
       </main>
     );
@@ -94,7 +99,9 @@ export default function CustomerCatalog({
             onFilterClick={() => {}}
           />
           <div className="flex flex-col items-center justify-center py-12">
-            <p className="text-on-surface-variant mb-4">No products found matching your filters.</p>
+            <p className="text-on-surface-variant mb-4">
+              No products found matching your filters.
+            </p>
             <button 
               onClick={() => filterProducts({ categories: [], brands: [], maxPrice: 500 })}
               className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-opacity-90"

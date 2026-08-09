@@ -73,11 +73,11 @@ export default function App() {
       <Navbar activeView={activeView} setActiveView={setActiveView} />
       
       <div className="flex-1 flex flex-col w-full">
-        {/* Customer Views */}
+        {/* Customer Views - all receive setActiveView */}
         {role === 'customer' && activeView === 'home' && <Home setActiveView={setActiveView} setSelectedProductId={setSelectedProductId} />}
         {role === 'customer' && activeView === 'catalog' && <CustomerCatalog setActiveView={setActiveView} setSelectedProductId={setSelectedProductId} />}
         {role === 'customer' && activeView === 'product_detail' && <ProductDetail productId={selectedProductId} setActiveView={setActiveView} />}
-        {role === 'customer' && activeView === 'rentals' && <MyRentals />}
+        {role === 'customer' && activeView === 'rentals' && <MyRentals setActiveView={setActiveView} />}
         {role === 'customer' && activeView === 'cart' && <Cart setActiveView={setActiveView} />}
         
         {/* Admin Views */}

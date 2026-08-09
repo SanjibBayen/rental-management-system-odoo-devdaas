@@ -18,14 +18,11 @@ export default function Login({ initialStep = 'login', onBack }: LoginProps) {
   const [name, setName] = useState('');
   const [otp, setOtp] = useState('');
   const [userId, setUserId] = useState<string | null>(null);
-  const [role, setRole] = useState<Role>('customer'); // ✅ Role state
+  const [role, setRole] = useState<Role>('customer');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const submitRef = useRef<HTMLButtonElement | null>(null);
 
-  // ============================================================
-  // Step 1: Login / Signup Submission
-  // ============================================================
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -33,32 +30,10 @@ export default function Login({ initialStep = 'login', onBack }: LoginProps) {
 
     try {
       if (step === 'login') {
-        try {
-          await login(email, password);
-        } catch (err: any) {
-          const message = err.message || '';
-          if (message.toLowerCase().includes('verify your email')) {
-            const backendUserId = err.response?.data?.userId;
-            if (backendUserId) {
-              setUserId(backendUserId);
-            } else {
-              const storedUser = localStorage.getItem('user');
-              if (storedUser) {
-                try {
-                  const parsed = JSON.parse(storedUser);
-                  if (parsed.id) setUserId(parsed.id);
-                } catch {}
-              }
-            }
-            await resendOTP(userId || '', email);
-            setStep('otp');
-            setError('Please verify your email. A new OTP has been sent.');
-          } else {
-            setError(message);
-          }
-        }
+        
+        await login(email, password);
       } else if (step === 'signup') {
-        // ✅ Pass the selected role to signup
+        
         const result = await signup(name, email, password, role);
         if (result?.userId) {
           setUserId(result.userId);
@@ -70,15 +45,21 @@ export default function Login({ initialStep = 'login', onBack }: LoginProps) {
         }
       }
     } catch (err: any) {
-      setError(err.message || 'Authentication failed. Please try again.');
+      const message = err.message || 'Authentication failed. Please try again.';
+      if (message.toLowerCase().includes('verify your email')) {
+        const backendUserId = err.response?.data?.userId || userId;
+        if (backendUserId) setUserId(backendUserId);
+        await resendOTP(backendUserId || '', email);
+        setStep('otp');
+        setError('Please verify your email. A new OTP has been sent.');
+      } else {
+        setError(message);
+      }
     } finally {
       setIsLoading(false);
     }
   };
 
-  // ============================================================
-  // Step 2: OTP Verification
-  // ============================================================
   const handleOtpSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -87,6 +68,7 @@ export default function Login({ initialStep = 'login', onBack }: LoginProps) {
     try {
       if (!userId) throw new Error('User ID missing. Please start over.');
       await verifyOTP(userId, otp);
+      // ✅ Login with only email and password
       await login(email, password);
     } catch (err: any) {
       setError(err.message || 'OTP verification failed. Please try again.');
@@ -95,32 +77,13 @@ export default function Login({ initialStep = 'login', onBack }: LoginProps) {
     }
   };
 
-  // ============================================================
-  // Auto‑fill demo accounts with role switching
-  // ============================================================
-  const autofillDemo = (demoEmail: string, demoRole: Role) => {
-    setEmail(demoEmail);
-    setPassword('password123');
-    setRole(demoRole); // ✅ Set the role
-    setStep('login');
-    setTimeout(() => {
-      submitRef.current?.click();
-    }, 500);
-  };
-
-  // ============================================================
-  // Render
-  // ============================================================
   return (
     <div className="min-h-screen bg-surface-muted flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Ambient background glow */}
       <div className="pointer-events-none absolute top-1/4 -left-40 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-[float_8s_ease-in-out_infinite]" />
       <div className="pointer-events-none absolute bottom-1/4 -right-40 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-[float_10s_ease-in-out_infinite_reverse]" />
 
       <div className="max-w-4xl w-full grid grid-cols-1 md:grid-cols-2 bg-white rounded-2xl shadow-2xl shadow-black/10 overflow-hidden border border-border-standard relative animate-[fadeIn_0.5s_ease-out]">
-        {/* Left side branding */}
         <div className="bg-primary p-12 text-white flex flex-col justify-center relative overflow-hidden">
-          {/* Animated gradient mesh */}
           <div
             className="pointer-events-none absolute inset-0 opacity-60 animate-[meshShift_12s_ease-in-out_infinite]"
             style={{
@@ -128,7 +91,6 @@ export default function Login({ initialStep = 'login', onBack }: LoginProps) {
                 'radial-gradient(circle at 20% 20%, rgba(255,255,255,0.15) 0%, transparent 45%), radial-gradient(circle at 80% 70%, rgba(255,255,255,0.12) 0%, transparent 45%)',
             }}
           />
-          {/* Dot grid */}
           <div
             className="pointer-events-none absolute inset-0 opacity-[0.08]"
             style={{
@@ -136,10 +98,8 @@ export default function Login({ initialStep = 'login', onBack }: LoginProps) {
               backgroundSize: '24px 24px',
             }}
           />
-          {/* Floating glow orbs */}
           <div className="pointer-events-none absolute -top-24 -right-24 w-64 h-64 bg-white/10 rounded-full blur-3xl animate-[float_9s_ease-in-out_infinite]" />
           <div className="pointer-events-none absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full blur-2xl animate-[float_7s_ease-in-out_infinite_reverse]" />
-          {/* Bottom vignette for depth */}
           <div className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-linear-to-t from-black/10 to-transparent" />
 
           <div className="relative z-10">
@@ -158,44 +118,9 @@ export default function Login({ initialStep = 'login', onBack }: LoginProps) {
               </span>
               Powered by Odoo Infrastructure
             </div>
-
-            <div className="mt-8 space-y-3">
-              <p className="text-sm font-bold text-primary-container/80 uppercase tracking-wider">
-                Demo Accounts (Click to auto‑fill)
-              </p>
-              <div className="flex flex-col gap-2">
-                {/* ✅ Admin Button */}
-                <button
-                  onClick={() => autofillDemo('admin@rentflow.com', 'admin')}
-                  className="group text-left text-sm bg-white/5 hover:bg-white/15 border border-white/10 hover:border-white/25 px-4 py-2.5 rounded-lg transition-all duration-200 flex items-center gap-2 hover:translate-x-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
-                >
-                  <Building2 className="w-4 h-4 text-primary-container shrink-0 group-hover:scale-110 transition-transform" />
-                  <span className="font-semibold text-white">Admin Portal</span>
-                </button>
-
-                {/* ✅ Customer Button */}
-                <button
-                  onClick={() => autofillDemo('john@example.com', 'customer')}
-                  className="group text-left text-sm bg-white/5 hover:bg-white/15 border border-white/10 hover:border-white/25 px-4 py-2.5 rounded-lg transition-all duration-200 flex items-center gap-2 hover:translate-x-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
-                >
-                  <UserIcon className="w-4 h-4 text-primary-container shrink-0 group-hover:scale-110 transition-transform" />
-                  <span className="font-semibold text-white">Customer Portal</span>
-                </button>
-
-                {/* ✅ Delivery Button */}
-                <button
-                  onClick={() => autofillDemo('dave@rentflow.com', 'delivery')}
-                  className="group text-left text-sm bg-white/5 hover:bg-white/15 border border-white/10 hover:border-white/25 px-4 py-2.5 rounded-lg transition-all duration-200 flex items-center gap-2 hover:translate-x-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
-                >
-                  <Truck className="w-4 h-4 text-primary-container shrink-0 group-hover:scale-110 transition-transform" />
-                  <span className="font-semibold text-white">Delivery Portal</span>
-                </button>
-              </div>
-            </div>
           </div>
         </div>
 
-        {/* Right side login/signup/otp */}
         <div className="p-12 flex flex-col justify-center bg-surface-bright relative">
           {onBack && (
             <button
@@ -209,13 +134,13 @@ export default function Login({ initialStep = 'login', onBack }: LoginProps) {
           )}
 
           <h2 className="text-3xl font-black text-on-surface mb-2 tracking-tight">
-            {step === 'login' && 'Welcome Back'}
-            {step === 'signup' && 'Create an Account'}
+            {step === 'login' && `Sign in as ${role}`}
+            {step === 'signup' && `Create ${role} Account`}
             {step === 'otp' && 'Verify Your Email'}
           </h2>
           <p className="text-on-surface-variant font-medium mb-8 text-lg">
-            {step === 'login' && 'Enter your credentials to access your portal.'}
-            {step === 'signup' && 'Sign up to start renting professional equipment.'}
+            {step === 'login' && `Enter your credentials to access the ${role} portal.`}
+            {step === 'signup' && `Sign up to start renting as a ${role}.`}
             {step === 'otp' && `We’ve sent a 6‑digit OTP to ${email}.`}
           </p>
 
@@ -225,7 +150,6 @@ export default function Login({ initialStep = 'login', onBack }: LoginProps) {
             </div>
           )}
 
-          {/* ---------- LOGIN / SIGNUP FORM ---------- */}
           {step !== 'otp' && (
             <form onSubmit={handleSubmit} className="space-y-5">
               {step === 'signup' && (
@@ -286,27 +210,24 @@ export default function Login({ initialStep = 'login', onBack }: LoginProps) {
                 </div>
               </div>
 
-              {/* ✅ Role Selector (only for signup) */}
-              {step === 'signup' && (
-                <div>
-                  <label className="block text-sm font-bold text-on-surface mb-2">Select Role</label>
-                  <div className="flex gap-4 bg-surface-muted p-3 rounded-xl border border-border-standard">
-                    {['customer', 'admin', 'delivery'].map((r) => (
-                      <label key={r} className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="radio"
-                          name="role"
-                          value={r}
-                          checked={role === r}
-                          onChange={() => setRole(r as Role)}
-                          className="accent-primary w-4 h-4"
-                        />
-                        <span className="font-medium text-sm capitalize">{r}</span>
-                      </label>
-                    ))}
-                  </div>
+              <div className="mt-4">
+                <label className="block text-sm font-bold text-on-surface mb-2">Select Role</label>
+                <div className="flex gap-4 bg-surface-muted p-3 rounded-xl border border-border-standard">
+                  {['customer', 'admin', 'delivery'].map((r) => (
+                    <label key={r} className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="role"
+                        value={r}
+                        checked={role === r}
+                        onChange={() => setRole(r as Role)}
+                        className="accent-primary w-4 h-4"
+                      />
+                      <span className="font-medium text-sm capitalize">{r}</span>
+                    </label>
+                  ))}
                 </div>
-              )}
+              </div>
 
               <div className="flex items-center justify-between gap-4">
                 <button
@@ -335,7 +256,6 @@ export default function Login({ initialStep = 'login', onBack }: LoginProps) {
             </form>
           )}
 
-          {/* ---------- OTP VERIFICATION FORM ---------- */}
           {step === 'otp' && (
             <form onSubmit={handleOtpSubmit} className="space-y-5 animate-[fadeInUp_0.4s_ease-out]">
               <div className="flex items-center gap-3 p-4 bg-primary/5 rounded-xl border border-primary/20 mb-4">

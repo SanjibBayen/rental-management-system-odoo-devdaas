@@ -1,12 +1,3 @@
-<<<<<<< HEAD
-﻿import React from 'react';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
-import { ArrowUpRight, TrendingUp, Users, Package } from 'lucide-react';
-import { useDashboard } from '../../hooks/useDashboard';
-import { useRentals } from '../../hooks/useRentals';
-import { useProducts } from '../../hooks/useProducts';
-import { formatCurrency } from '../../utils/formatters';
-=======
 import React from "react";
 import {
   AreaChart,
@@ -24,7 +15,6 @@ import { useDashboard } from "../../hooks/useDashboard";
 import { useRentals } from "../../hooks/useRentals";
 import { useProducts } from "../../hooks/useProducts";
 import { formatCurrency } from "../../utils/formatters";
->>>>>>> bf3bf601e0c49d74f74dedbdf4e75f59be11a47d
 
 export default function Analytics() {
   const { stats, isLoading: dashboardLoading } = useDashboard();
@@ -50,18 +40,12 @@ export default function Analytics() {
 
     // Group rentals by month
     const monthlyData: Record<string, number> = {};
-<<<<<<< HEAD
-    rentals.forEach((rental: any) => {
-      const month = new Date(rental.start_date).toLocaleString('en-US', { month: 'short' });
-      monthlyData[month] = (monthlyData[month] || 0) + rental.total_amount;
-=======
     rentals.forEach((rental) => {
       const month = new Date(rental.start_date || "").toLocaleString("en-US", {
         month: "short",
       });
       monthlyData[month] =
         (monthlyData[month] || 0) + (rental.total_amount ?? 0);
->>>>>>> bf3bf601e0c49d74f74dedbdf4e75f59be11a47d
     });
 
     // Sort months
