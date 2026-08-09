@@ -40,7 +40,7 @@ interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   error: string | null;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<User>;
   signup: (
     name: string,
     email: string,
@@ -139,6 +139,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       localStorage.setItem("user", JSON.stringify(mappedUser));
       setUser(mappedUser);
+      return mappedUser;
     } catch (error: any) {
       const message =
         error.response?.data?.message || error.message || "Login failed";

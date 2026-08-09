@@ -11,7 +11,7 @@ interface LoginProps {
 }
 
 export default function Login({ initialStep = 'login', onBack }: LoginProps) {
-  const { login, signup, verifyOTP, resendOTP } = useAuth();
+  const { login, signup, verifyOTP, resendOTP, logout } = useAuth();
   const [step, setStep] = useState<Step>(initialStep);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -30,8 +30,19 @@ export default function Login({ initialStep = 'login', onBack }: LoginProps) {
 
     try {
       if (step === 'login') {
-        
-        await login(email, password);
+        const loggedInUser = await login(email, password);
+
+        // App.tsx always routes based on the account's REAL role from the
+        // backend — this check just gives a clear message when that
+        // doesn't match the role selected here, instead of silently
+        // landing on a different dashboard than expected.
+        if (loggedInUser.role !== role) {
+          logout();
+          setError(
+            `This account is registered as "${loggedInUser.role}", not "${role}". Select "${loggedInUser.role}" above and sign in again.`
+          );
+          return;
+        }
       } else if (step === 'signup') {
         
         const result = await signup(name, email, password, role);
@@ -68,7 +79,7 @@ export default function Login({ initialStep = 'login', onBack }: LoginProps) {
     try {
       if (!userId) throw new Error('User ID missing. Please start over.');
       await verifyOTP(userId, otp);
-      // ✅ Login with only email and password
+    
       await login(email, password);
     } catch (err: any) {
       setError(err.message || 'OTP verification failed. Please try again.');
@@ -112,12 +123,7 @@ export default function Login({ initialStep = 'login', onBack }: LoginProps) {
             <p className="text-primary-container text-lg font-medium leading-relaxed">
               Enterprise rental management system. Streamline your inventory, customers, and deliveries in one unified platform.
             </p>
-            <div className="mt-12 flex items-center gap-3 text-sm text-primary-container font-medium bg-white/10 p-4 rounded-xl border border-white/15 backdrop-blur-sm">
-              <span className="flex items-center justify-center w-8 h-8 rounded-full bg-white/10 shrink-0">
-                <Briefcase className="w-4 h-4" />
-              </span>
-              Powered by Odoo Infrastructure
-            </div>
+           
           </div>
         </div>
 
@@ -212,15 +218,18 @@ export default function Login({ initialStep = 'login', onBack }: LoginProps) {
 
               <div className="mt-4">
                 <label className="block text-sm font-bold text-on-surface mb-2">Select Role</label>
-                <div className="flex gap-4 bg-surface-muted p-3 rounded-xl border border-border-standard">
-                  {['customer', 'admin', 'delivery'].map((r) => (
-                    <label key={r} className="flex items-center gap-2 cursor-pointer">
+                <div className="flex flex-col sm:flex-row gap-3 bg-surface-muted p-3 rounded-xl border border-border-standard">
+                  {(['customer', 'admin', 'delivery'] as Role[]).map((r) => (
+                    <label
+                      key={r}
+                      className="flex items-center gap-2 p-3 rounded-xl cursor-pointer transition-colors hover:bg-white/10"
+                    >
                       <input
                         type="radio"
                         name="role"
                         value={r}
                         checked={role === r}
-                        onChange={() => setRole(r as Role)}
+                        onChange={() => setRole(r)}
                         className="accent-primary w-4 h-4"
                       />
                       <span className="font-medium text-sm capitalize">{r}</span>
