@@ -1,75 +1,26 @@
-import { useState, useEffect } from 'react';
-import { api } from '../services/api';
-import { useAuth } from './useAuth';
+const { 
+  orders, 
+  isLoading, 
+  filters, 
+  setFilters, 
+  loadMore, 
+  returnOrder,
+  getOrderStats 
+} = useOrders();
 
-export interface Order {
-  id: string;
-  rental_number: string;
-  product_name: string;
-  start_date: string;
-  end_date: string;
-  status: 'pending' | 'active' | 'overdue' | 'returned' | 'cancelled';
-  total_amount: number;
-  deposit_amount: number;
-  late_fee?: number;
-  refund_amount?: number;
-  product_image?: string;
-}
+// Filter by status
+setFilters({ status: 'active' });
 
-export function useOrders() {
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-  const { user } = useAuth();
+// Sort by amount
+setFilters({ sortBy: 'amount', sortOrder: 'desc' });
 
-  const fetchOrders = async () => {
-    try {
-      setIsLoading(true);
-      const response = await api.get('/rentals/user');
-      setOrders(response.data.data || []);
-      setError(null);
-    } catch (err) {
-      setError(err instanceof Error ? err : new Error('Failed to fetch orders'));
-    } finally {
-      setIsLoading(false);
-    }
-  };
+// Search orders
+setFilters({ searchQuery: 'camera' });
 
-  useEffect(() => {
-    if (user) {
-      fetchOrders();
-    } else {
-      setOrders([]);
-      setIsLoading(false);
-    }
-  }, [user]);
+// Load more orders
+loadMore();
 
-  const returnOrder = async (orderId: string, returnDate: string) => {
-    try {
-      const response = await api.put(`/rentals/${orderId}/return`, { returnDate });
-      // Refresh orders after return
-      await fetchOrders();
-      return response.data;
-    } catch (err) {
-      throw err instanceof Error ? err : new Error('Failed to return order');
-    }
-  };
-
-  const getInvoice = async (orderId: string) => {
-    try {
-      const response = await api.get(`/rentals/${orderId}/invoice`);
-      return response.data.data;
-    } catch (err) {
-      throw err instanceof Error ? err : new Error('Failed to fetch invoice');
-    }
-  };
-
-  return {
-    orders,
-    isLoading,
-    error,
-    refetch: fetchOrders,
-    returnOrder,
-    getInvoice,
-  };
-}
+// Get statistics
+const stats = getOrderStats();
+console.log(`Active orders: ${stats.active}`);
+console.log(`Total spent: ₹${stats.totalSpent}`);
