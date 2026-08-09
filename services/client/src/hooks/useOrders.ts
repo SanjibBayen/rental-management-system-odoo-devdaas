@@ -1,26 +1,62 @@
-const { 
-  orders, 
-  isLoading, 
-  filters, 
-  setFilters, 
-  loadMore, 
-  returnOrder,
-  getOrderStats 
-} = useOrders();
+import { useCallback, useState } from "react";
 
-// Filter by status
-setFilters({ status: 'active' });
+export interface Order {
+  id: string;
+  rentalNumber?: string;
+  customerName?: string;
+  status: string;
+  totalAmount: number;
+  createdAt?: string;
+}
 
-// Sort by amount
-setFilters({ sortBy: 'amount', sortOrder: 'desc' });
+export interface OrderStats {
+  active: number;
+  totalSpent: number;
+}
 
-// Search orders
-setFilters({ searchQuery: 'camera' });
+interface OrdersFilters {
+  status?: string;
+  sortBy?: string;
+  sortOrder?: "asc" | "desc";
+  searchQuery?: string;
+}
 
-// Load more orders
-loadMore();
+export function useOrders() {
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [filters, setFiltersState] = useState<OrdersFilters>({});
 
-// Get statistics
-const stats = getOrderStats();
-console.log(`Active orders: ${stats.active}`);
-console.log(`Total spent: ₹${stats.totalSpent}`);
+  const setFilters = useCallback((nextFilters: OrdersFilters) => {
+    setFiltersState((prev) => ({ ...prev, ...nextFilters }));
+  }, []);
+
+  const loadMore = useCallback(() => {
+    setIsLoading(true);
+    setOrders((prev) => prev);
+    setIsLoading(false);
+  }, []);
+
+  const returnOrder = useCallback(async (_orderId: string) => {
+    setIsLoading(true);
+    setOrders((prev) => prev.filter((order) => order.id !== _orderId));
+    setIsLoading(false);
+  }, []);
+
+  const getOrderStats = useCallback(
+    (): OrderStats => ({
+      active: orders.filter((order) => order.status === "active").length,
+      totalSpent: orders.reduce((sum, order) => sum + order.totalAmount, 0),
+    }),
+    [orders],
+  );
+
+  return {
+    orders,
+    isLoading,
+    filters,
+    setFilters,
+    loadMore,
+    returnOrder,
+    getOrderStats,
+  };
+}

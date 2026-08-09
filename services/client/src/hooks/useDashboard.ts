@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { api } from '../services/api';
+import { useState, useEffect, useCallback, useRef } from "react";
+import { api } from "../services/api";
 
 // Export types for use in other components
 export interface DashboardStats {
@@ -21,7 +21,7 @@ export interface Rental {
   customerName: string;
   startDate: string;
   endDate: string;
-  status: 'active' | 'overdue' | 'completed' | 'pending';
+  status: "active" | "overdue" | "completed" | "pending";
   amount: number;
 }
 
@@ -83,8 +83,8 @@ export function useDashboard(options: UseDashboardOptions = {}) {
   });
 
   const abortControllerRef = useRef<AbortController | null>(null);
-  const retryTimeoutRef = useRef<NodeJS.Timeout>();
-  const refreshIntervalRef = useRef<NodeJS.Timeout>();
+  const retryTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const refreshIntervalRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Transform raw API data to frontend format
   const transformDashboardData = (data: any): DashboardStats => {
@@ -93,15 +93,19 @@ export function useDashboard(options: UseDashboardOptions = {}) {
       overdueRentals: data.overdueRentals || data.overdue_rentals || 0,
       totalProducts: data.totalProducts || data.total_products || 0,
       totalRevenue: data.totalRevenue || data.total_revenue || 0,
-      recentRentals: (data.recentRentals || data.recent_rentals || []).map((rental: any) => ({
-        id: rental.id,
-        productName: rental.productName || rental.product_name || 'Unknown Product',
-        customerName: rental.customerName || rental.customer_name || 'Unknown Customer',
-        startDate: rental.startDate || rental.start_date,
-        endDate: rental.endDate || rental.end_date,
-        status: rental.status || 'pending',
-        amount: rental.amount || 0,
-      })),
+      recentRentals: (data.recentRentals || data.recent_rentals || []).map(
+        (rental: any) => ({
+          id: rental.id,
+          productName:
+            rental.productName || rental.product_name || "Unknown Product",
+          customerName:
+            rental.customerName || rental.customer_name || "Unknown Customer",
+          startDate: rental.startDate || rental.start_date,
+          endDate: rental.endDate || rental.end_date,
+          status: rental.status || "pending",
+          amount: rental.amount || 0,
+        }),
+      ),
       revenueByPeriod: data.revenueByPeriod || data.revenue_by_period,
       rentalsByStatus: data.rentalsByStatus || data.rentals_by_status,
       topProducts: data.topProducts || data.top_products,
@@ -111,79 +115,88 @@ export function useDashboard(options: UseDashboardOptions = {}) {
   };
 
   // Fetch dashboard stats
-  const fetchStats = useCallback(async (isRefresh = false) => {
-    // Cancel any ongoing request
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-    }
-
-    const abortController = new AbortController();
-    abortControllerRef.current = abortController;
-
-    try {
-      setState(prev => ({
-        ...prev,
-        isLoading: !isRefresh && !prev.stats,
-        isRefreshing: isRefresh && !!prev.stats,
-        error: null,
-      }));
-
-      // Build query parameters
-      const params: Record<string, string> = {};
-      if (dateRange?.startDate) {
-        params.startDate = dateRange.startDate;
-      }
-      if (dateRange?.endDate) {
-        params.endDate = dateRange.endDate;
+  const fetchStats = useCallback(
+    async (isRefresh = false) => {
+      // Cancel any ongoing request
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
       }
 
-      const response = await api.get('/dashboard', {
-        params,
-        signal: abortController.signal,
-      });
+      const abortController = new AbortController();
+      abortControllerRef.current = abortController;
 
-      const rawData = response.data.data || response.data;
-      const transformedStats = transformDashboardData(rawData);
+      try {
+        setState((prev) => ({
+          ...prev,
+          isLoading: !isRefresh && !prev.stats,
+          isRefreshing: isRefresh && !!prev.stats,
+          error: null,
+        }));
 
-      setState({
-        stats: transformedStats,
-        isLoading: false,
-        isRefreshing: false,
-        error: null,
-        lastUpdated: new Date(),
-        retryCount: 0,
-      });
+        // Build query parameters
+        const params: Record<string, string> = {};
+        if (dateRange?.startDate) {
+          params.startDate = dateRange.startDate;
+        }
+        if (dateRange?.endDate) {
+          params.endDate = dateRange.endDate;
+        }
 
-      // Clear retry timeout on success
-      if (retryTimeoutRef.current) {
-        clearTimeout(retryTimeoutRef.current);
+        const response = await api.get("/dashboard", {
+          params,
+          signal: abortController.signal,
+        });
+
+        const rawData = response.data.data || response.data;
+        const transformedStats = transformDashboardData(rawData);
+
+        setState({
+          stats: transformedStats,
+          isLoading: false,
+          isRefreshing: false,
+          error: null,
+          lastUpdated: new Date(),
+          retryCount: 0,
+        });
+
+        // Clear retry timeout on success
+        if (retryTimeoutRef.current) {
+          clearTimeout(retryTimeoutRef.current);
+        }
+      } catch (err: any) {
+        // Don't update state if request was cancelled
+        if (err?.name === "AbortError" || err?.code === "ERR_CANCELED") {
+          return;
+        }
+
+        const error =
+          err instanceof Error
+            ? err
+            : new Error("Failed to fetch dashboard stats");
+
+        setState((prev) => ({
+          ...prev,
+          isLoading: false,
+          isRefreshing: false,
+          error,
+          // Keep existing stats if refreshing
+          stats: isRefresh ? prev.stats : prev.stats,
+          retryCount: prev.retryCount + 1,
+        }));
+
+        // Retry logic for failed requests
+        if (state.retryCount < MAX_RETRIES) {
+          retryTimeoutRef.current = setTimeout(
+            () => {
+              fetchStats(isRefresh);
+            },
+            RETRY_DELAY * Math.pow(2, state.retryCount),
+          ); // Exponential backoff
+        }
       }
-    } catch (err: any) {
-      // Don't update state if request was cancelled
-      if (err?.name === 'AbortError' || err?.code === 'ERR_CANCELED') {
-        return;
-      }
-
-      const error = err instanceof Error ? err : new Error('Failed to fetch dashboard stats');
-      
-      setState(prev => ({
-        ...prev,
-        isLoading: false,
-        isRefreshing: false,
-        error,
-        // Keep existing stats if refreshing
-        stats: isRefresh ? prev.stats : prev.stats,
-        retryCount: prev.retryCount + 1,
-      }));
-
-      // Retry logic for failed requests
-      if (state.retryCount < MAX_RETRIES) {
-        retryTimeoutRef.current = setTimeout(() => {
-          fetchStats(isRefresh);
-        }, RETRY_DELAY * Math.pow(2, state.retryCount)); // Exponential backoff
-      }
-    }
-  }, [dateRange, state.retryCount]);
+    },
+    [dateRange, state.retryCount],
+  );
 
   // Initial fetch
   useEffect(() => {
@@ -229,13 +242,17 @@ export function useDashboard(options: UseDashboardOptions = {}) {
   }, [fetchStats]);
 
   // Calculate derived statistics
-  const activeRentalsPercentage = state.stats 
-    ? Math.round((state.stats.activeRentals / (state.stats.totalProducts || 1)) * 100)
+  const activeRentalsPercentage = state.stats
+    ? Math.round(
+        (state.stats.activeRentals / (state.stats.totalProducts || 1)) * 100,
+      )
     : 0;
 
   const overdueRate = state.stats
     ? state.stats.activeRentals > 0
-      ? Math.round((state.stats.overdueRentals / state.stats.activeRentals) * 100)
+      ? Math.round(
+          (state.stats.overdueRentals / state.stats.activeRentals) * 100,
+        )
       : 0
     : 0;
 
@@ -253,21 +270,21 @@ export function useDashboard(options: UseDashboardOptions = {}) {
     error: state.error,
     lastUpdated: state.lastUpdated,
     retryCount: state.retryCount,
-    
+
     // Actions
     refetch,
-    
+
     // Derived statistics
     activeRentalsPercentage,
     overdueRate,
     averageRentalValue,
-    
+
     // Sub-data for easier access
     recentRentals: state.stats?.recentRentals || [],
     revenueByPeriod: state.stats?.revenueByPeriod || [],
     rentalsByStatus: state.stats?.rentalsByStatus || [],
     topProducts: state.stats?.topProducts || [],
-    
+
     // Convenience getters
     hasError: !!state.error,
     isRetrying: state.retryCount > 0 && !!state.error,
