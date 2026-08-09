@@ -19,6 +19,7 @@ import DeliveryDashboard from './pages/delivery/DeliveryDashboard';
 import Route from './pages/delivery/Route';
 
 // Shared Public
+import Landing from './pages/public/Landing';
 import Login from './pages/public/Login';
 import Profile from './pages/public/Profile';
 
@@ -28,6 +29,7 @@ export default function App() {
   const { user, isLoading } = useAuth();
   const [activeView, setActiveView] = useState('dashboard');
   const [selectedProductId, setSelectedProductId] = useState<string>('');
+  const [authView, setAuthView] = useState<'landing' | 'login' | 'signup'>('landing');
   
   useEffect(() => {
     if (user) {
@@ -48,7 +50,20 @@ export default function App() {
   }
 
   if (!user) {
-    return <Login />;
+    if (authView === 'landing') {
+      return (
+        <Landing
+          onLogin={() => setAuthView('login')}
+          onRegister={() => setAuthView('signup')}
+        />
+      );
+    }
+    return (
+      <Login
+        initialStep={authView}
+        onBack={() => setAuthView('landing')}
+      />
+    );
   }
 
   const role = user.role;

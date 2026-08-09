@@ -1,13 +1,18 @@
 import React, { useRef, useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
-import { Building2, User, Truck, Briefcase, Mail, Lock, ArrowRight, User as UserIcon, ShieldCheck } from 'lucide-react';
+import { Building2, User, Truck, Briefcase, Mail, Lock, ArrowRight, ArrowLeft, User as UserIcon, ShieldCheck } from 'lucide-react';
 
 type Step = 'login' | 'signup' | 'otp';
 type Role = 'admin' | 'customer' | 'delivery';
 
-export default function Login() {
+interface LoginProps {
+  initialStep?: 'login' | 'signup';
+  onBack?: () => void;
+}
+
+export default function Login({ initialStep = 'login', onBack }: LoginProps) {
   const { login, signup, verifyOTP, resendOTP } = useAuth();
-  const [step, setStep] = useState<Step>('login');
+  const [step, setStep] = useState<Step>(initialStep);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
@@ -192,6 +197,17 @@ export default function Login() {
 
         {/* Right side login/signup/otp */}
         <div className="p-12 flex flex-col justify-center bg-surface-bright relative">
+          {onBack && (
+            <button
+              type="button"
+              onClick={onBack}
+              className="inline-flex items-center gap-1.5 text-sm font-bold text-on-surface-variant hover:text-primary transition-colors mb-6 self-start"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Back to Home
+            </button>
+          )}
+
           <h2 className="text-3xl font-black text-on-surface mb-2 tracking-tight">
             {step === 'login' && 'Welcome Back'}
             {step === 'signup' && 'Create an Account'}

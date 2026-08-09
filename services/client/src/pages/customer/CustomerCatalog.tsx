@@ -2,6 +2,7 @@ import Sidebar from '../../components/Sidebar';
 import CatalogHeader from '../../components/CatalogHeader';
 import ProductCard from '../../components/ProductCard';
 import Pagination from '../../components/Pagination';
+import { useState } from 'react';
 import { useProducts } from '../../hooks/useProducts';
 import { Product } from '../../types';
 
@@ -22,13 +23,30 @@ export default function CustomerCatalog({
     activeFilters,
     refetch 
   } = useProducts();
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [sortBy, setSortBy] = useState('recommended');
+
+  const handleViewModeChange = (mode: 'grid' | 'list') => setViewMode(mode);
+
+  const handleSortChange = (sort: string) => {
+    setSortBy(sort);
+    if (pagination?.page !== 1) {
+      changePage(1);
+    }
+  };
 
   if (isLoading) {
     return (
       <main className="flex-1 max-w-7xl mx-auto w-full px-margin-desktop py-8 grid grid-cols-1 lg:grid-cols-4 gap-8">
         <Sidebar />
         <section className="col-span-1 lg:col-span-3 flex flex-col gap-6">
-          <CatalogHeader />
+          <CatalogHeader
+            viewMode={viewMode}
+            onViewModeChange={handleViewModeChange}
+            sortBy={sortBy}
+            onSortChange={handleSortChange}
+            onFilterClick={() => {}}
+          />
           <div className="flex justify-center items-center py-12">
             <div className="animate-pulse text-on-surface-variant">Loading products...</div>
           </div>
@@ -42,7 +60,13 @@ export default function CustomerCatalog({
       <main className="flex-1 max-w-7xl mx-auto w-full px-margin-desktop py-8 grid grid-cols-1 lg:grid-cols-4 gap-8">
         <Sidebar />
         <section className="col-span-1 lg:col-span-3 flex flex-col gap-6">
-          <CatalogHeader />
+          <CatalogHeader
+            viewMode={viewMode}
+            onViewModeChange={handleViewModeChange}
+            sortBy={sortBy}
+            onSortChange={handleSortChange}
+            onFilterClick={() => {}}
+          />
           <div className="flex justify-center items-center py-12 text-danger-red">
             Error loading products: {error.message}
           </div>
@@ -62,7 +86,13 @@ export default function CustomerCatalog({
       <main className="flex-1 max-w-7xl mx-auto w-full px-margin-desktop py-8 grid grid-cols-1 lg:grid-cols-4 gap-8">
         <Sidebar />
         <section className="col-span-1 lg:col-span-3 flex flex-col gap-6">
-          <CatalogHeader />
+          <CatalogHeader
+            viewMode={viewMode}
+            onViewModeChange={handleViewModeChange}
+            sortBy={sortBy}
+            onSortChange={handleSortChange}
+            onFilterClick={() => {}}
+          />
           <div className="flex flex-col items-center justify-center py-12">
             <p className="text-on-surface-variant mb-4">No products found matching your filters.</p>
             <button 
@@ -81,7 +111,13 @@ export default function CustomerCatalog({
     <main className="flex-1 max-w-7xl mx-auto w-full px-margin-desktop py-8 grid grid-cols-1 lg:grid-cols-4 gap-8">
       <Sidebar />
       <section className="col-span-1 lg:col-span-3 flex flex-col gap-6">
-        <CatalogHeader />
+        <CatalogHeader
+          viewMode={viewMode}
+          onViewModeChange={handleViewModeChange}
+          sortBy={sortBy}
+          onSortChange={handleSortChange}
+          onFilterClick={() => {}}
+        />
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {products.map((product: Product) => (
             <div 
