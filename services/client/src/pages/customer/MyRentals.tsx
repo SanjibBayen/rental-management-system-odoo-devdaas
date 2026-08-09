@@ -170,13 +170,21 @@ export default function MyRentals() {
               const isReturned = rental.status === "returned";
               const isCancelled = rental.status === "cancelled";
 
+              const endDate = rental.end_date
+                ? new Date(rental.end_date)
+                : new Date();
+
               // Calculate days left
               const daysLeft = isActive
                 ? Math.max(
                     0,
                     Math.ceil(
+<<<<<<< HEAD
                       (new Date(rental.endDate).getTime() - Date.now()) /
                         (1000 * 60 * 60 * 24),
+=======
+                      (endDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24),
+>>>>>>> bf3bf601e0c49d74f74dedbdf4e75f59be11a47d
                     ),
                   )
                 : 0;
@@ -252,8 +260,13 @@ export default function MyRentals() {
                             Rental Period
                           </div>
                           <div className="font-bold text-sm text-on-surface">
+<<<<<<< HEAD
                             {formatDate(rental.startDate)} -{" "}
                             {formatDate(rental.endDate)}
+=======
+                            {formatDate(rental.start_date || "")} -{" "}
+                            {formatDate(rental.end_date || "")}
+>>>>>>> bf3bf601e0c49d74f74dedbdf4e75f59be11a47d
                           </div>
                         </div>
                         <div>
@@ -261,7 +274,11 @@ export default function MyRentals() {
                             Total Paid
                           </div>
                           <div className="font-bold text-sm text-primary">
+<<<<<<< HEAD
                             {formatCurrency(rental.totalAmount)}
+=======
+                            {formatCurrency(rental.total_amount ?? 0)}
+>>>>>>> bf3bf601e0c49d74f74dedbdf4e75f59be11a47d
                           </div>
                         </div>
                       </div>

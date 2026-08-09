@@ -1,126 +1,129 @@
-﻿import { useCallback, useEffect, useState } from 'react';
-import { api } from '../services/api';
-import type { Rental } from '../types/rental.types';
+import { useCallback, useEffect, useState } from "react";
+import { api } from "../services/api";
 
-export type RentalView = 'user' | 'all' | 'recent';
+export interface RentalRecord {
+  id: string;
+  status: string;
+  rental_number?: string;
+  customer_name?: string;
+  product_name?: string;
+  product_image?: string;
+  end_date?: string;
+  total_amount?: number;
+  totalAmount?: number;
+  [key: string]: any;
+}
 
-export interface RentalFilters {
-  view?: RentalView;
-  status?: 'pending' | 'active' | 'overdue' | 'returned' | 'cancelled';
+interface UseRentalsOptions {
+  view?: "user" | "recent" | "all";
   limit?: number;
-  page?: number;
 }
 
-export interface RentalStats {
-  active: number;
-  overdue: number;
-  totalRevenue: number;
-  totalRentals: number;
+interface UseRentalsFilters {
+  status?: string;
 }
 
-interface UseRentalsResult {
-  rentals: Rental[];
-  isLoading: boolean;
-  error: Error | null;
-  refetch: () => void;
-  updateFilters: (filters: Partial<RentalFilters>) => void;
-  getRentalStats: () => RentalStats;
-}
-
-export function useRentals(initialFilters: RentalFilters = {}): UseRentalsResult {
-  const [rentals, setRentals] = useState<Rental[]>([]);
-  const [filters, setFilters] = useState<RentalFilters>({
-    view: 'all',
-    limit: 20,
-    page: 1,
-    ...initialFilters,
-  });
+export function useRentals(options: UseRentalsOptions = {}) {
+  const { view = "user", limit = 10 } = options;
+  const [rentals, setRentals] = useState<RentalRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const [filters, setFilters] = useState<UseRentalsFilters>({});
 
   const fetchRentals = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-
     try {
-      const params: Record<string, string | number> = {
-        page: filters.page || 1,
-        limit: filters.limit || 20,
-      };
+      setIsLoading(true);
+      setError(null);
 
-      if (filters.view) params.view = filters.view;
-      if (filters.status) params.status = filters.status;
+      let endpoint = "/rentals";
+      if (view === "user") {
+        endpoint = "/rentals/user";
+      } else if (view === "recent") {
+        endpoint = "/dashboard/recent-rentals";
+      }
 
-      const response = await api.get('/rentals', { params });
-      const data = response.data?.data ?? response.data;
-      const items = Array.isArray(data.items) ? data.items : Array.isArray(data) ? data : [];
+      const response = await api.get(endpoint, {
+        params: { ...filters, limit },
+      });
 
-      setRentals(
-        items.map((rental: any) => ({
-          ...rental,
-          id: rental.id,
-          rentalNumber: rental.rentalNumber || rental.rental_number || '',
-          userId: rental.userId || rental.user_id || '',
-          productId: rental.productId || rental.product_id || '',
-          productName: rental.productName || rental.product_name || '',
-          customerName: rental.customerName || rental.customer_name || '',
-          startDate: rental.startDate || rental.start_date || '',
-          endDate: rental.endDate || rental.end_date || '',
-          actualReturnDate: rental.actualReturnDate || rental.actual_return_date,
-          status: rental.status,
-          totalAmount: rental.totalAmount || rental.total_amount || 0,
-          depositAmount: rental.depositAmount || rental.deposit_amount || 0,
-          lateFee: rental.lateFee || rental.late_fee || 0,
-          refundAmount: rental.refundAmount || rental.refund_amount || 0,
-          createdAt: rental.createdAt || rental.created_at,
-          updatedAt: rental.updatedAt || rental.updated_at,
-        })) as Rental[],
+      const payload = response.data?.data || response.data || [];
+      const normalized = Array.isArray(payload)
+        ? payload.map((item: any) => ({
+            ...item,
+            id: item.id || item.rental_id,
+            rental_number: item.rental_number || item.rentalNumber,
+            customer_name: item.customer_name || item.customerName,
+            product_name: item.product_name || item.productName,
+            product_image: item.product_image || item.productImage,
+            end_date: item.end_date || item.endDate,
+            total_amount: item.total_amount ?? item.totalAmount ?? 0,
+            status: item.status || "pending",
+          }))
+        : [];
+
+      setRentals(normalized);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err : new Error("Failed to load rentals"),
       );
-    } catch (err: any) {
-      setError(err instanceof Error ? err : new Error('Failed to load rentals'));
       setRentals([]);
     } finally {
       setIsLoading(false);
     }
-  }, [filters]);
+  }, [filters, limit, view]);
 
   useEffect(() => {
-    fetchRentals();
+    void fetchRentals();
   }, [fetchRentals]);
-
-  const updateFilters = useCallback((newFilters: Partial<RentalFilters>) => {
-    setFilters((prev) => ({
-      ...prev,
-      ...newFilters,
-      page: newFilters.page ?? prev.page,
-      limit: newFilters.limit ?? prev.limit,
-    }));
-  }, []);
-
-  const getRentalStats = useCallback((): RentalStats => {
-    return rentals.reduce(
-      (stats, rental) => {
-        stats.totalRentals += 1;
-        if (rental.status === 'active') stats.active += 1;
-        if (rental.status === 'overdue') stats.overdue += 1;
-        stats.totalRevenue += rental.totalAmount || 0;
-        return stats;
-      },
-      { active: 0, overdue: 0, totalRevenue: 0, totalRentals: 0 } as RentalStats,
-    );
-  }, [rentals]);
 
   const refetch = useCallback(() => {
-    fetchRentals();
+    void fetchRentals();
   }, [fetchRentals]);
+
+  const updateFilters = useCallback((nextFilters: UseRentalsFilters) => {
+    setFilters((prev) => ({ ...prev, ...nextFilters }));
+  }, []);
+
+  const returnRental = useCallback(
+    async (rentalId: string) => {
+      await api.put(`/rentals/${rentalId}/return`);
+      await refetch();
+    },
+    [refetch],
+  );
+
+  const approveRental = useCallback(
+    async (rentalId: string) => {
+      await api.put(`/rentals/${rentalId}/approve`);
+      await refetch();
+    },
+    [refetch],
+  );
+
+  const getRentalStats = useCallback(() => {
+    const active = rentals.filter(
+      (rental) => rental.status === "active",
+    ).length;
+    const totalRevenue = rentals.reduce(
+      (sum, rental) => sum + (rental.total_amount ?? rental.totalAmount ?? 0),
+      0,
+    );
+
+    return {
+      active,
+      totalRevenue,
+    };
+  }, [rentals]);
 
   return {
     rentals,
     isLoading,
     error,
+    filters,
     refetch,
     updateFilters,
+    returnRental,
+    approveRental,
     getRentalStats,
   };
 }
-

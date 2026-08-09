@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { api } from '../services/api';
-import { Product } from '../types';
+import { useState, useEffect, useCallback, useRef } from "react";
+import { api } from "../services/api";
+import { Product } from "../types";
 
 interface PaginationData {
   page: number;
@@ -18,7 +18,7 @@ interface FilterOptions {
   maxPrice: number;
   minPrice: number;
   search: string;
-  sortBy: 'recommended' | 'price_asc' | 'price_desc' | 'rating' | 'newest';
+  sortBy: "recommended" | "price_asc" | "price_desc" | "rating" | "newest";
   inStock: boolean | null;
   rating: number | null;
 }
@@ -39,11 +39,11 @@ interface PriceRange {
 const DEFAULT_FILTERS: FilterOptions = {
   categories: [],
   brands: [],
-  duration: 'day',
+  duration: "day",
   maxPrice: 500,
   minPrice: 0,
-  search: '',
-  sortBy: 'recommended',
+  search: "",
+  sortBy: "recommended",
   inStock: null,
   rating: null,
 };
@@ -63,136 +63,169 @@ export function useProducts() {
   const [brands, setBrands] = useState<string[]>([]);
   const [categoryCounts, setCategoryCounts] = useState<CategoryCount>({});
   const [brandCounts, setBrandCounts] = useState<BrandCount>({});
-  const [priceRange, setPriceRange] = useState<PriceRange>({ min: 0, max: 500 });
+  const [priceRange, setPriceRange] = useState<PriceRange>({
+    min: 0,
+    max: 500,
+  });
   const [isLoading, setIsLoading] = useState(true);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
   const [error, setError] = useState<Error | null>(null);
-  const [pagination, setPagination] = useState<PaginationData>(DEFAULT_PAGINATION);
-  const [activeFilters, setActiveFilters] = useState<FilterOptions>(DEFAULT_FILTERS);
+  const [pagination, setPagination] =
+    useState<PaginationData>(DEFAULT_PAGINATION);
+  const [activeFilters, setActiveFilters] =
+    useState<FilterOptions>(DEFAULT_FILTERS);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+<<<<<<< HEAD
   
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+=======
+
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+>>>>>>> bf3bf601e0c49d74f74dedbdf4e75f59be11a47d
   const abortControllerRef = useRef<AbortController | null>(null);
-  const previousFiltersRef = useRef<string>('');
+  const previousFiltersRef = useRef<string>("");
 
   // Build query params from filters
-  const buildQueryParams = useCallback((filters: FilterOptions, page: number, limit: number) => {
-    const params: Record<string, string | number | boolean> = {
-      page,
-      limit,
-      sortBy: filters.sortBy,
-      duration: filters.duration,
-    };
+  const buildQueryParams = useCallback(
+    (filters: FilterOptions, page: number, limit: number) => {
+      const params: Record<string, string | number | boolean> = {
+        page,
+        limit,
+        sortBy: filters.sortBy,
+        duration: filters.duration,
+      };
 
-    if (filters.categories.length > 0) {
-      params.categories = filters.categories.join(',');
-    }
+      if (filters.categories.length > 0) {
+        params.categories = filters.categories.join(",");
+      }
 
-    if (filters.brands.length > 0) {
-      params.brands = filters.brands.join(',');
-    }
+      if (filters.brands.length > 0) {
+        params.brands = filters.brands.join(",");
+      }
 
-    if (filters.maxPrice < priceRange.max) {
-      params.maxPrice = filters.maxPrice;
-    }
+      if (filters.maxPrice < priceRange.max) {
+        params.maxPrice = filters.maxPrice;
+      }
 
-    if (filters.minPrice > priceRange.min) {
-      params.minPrice = filters.minPrice;
-    }
+      if (filters.minPrice > priceRange.min) {
+        params.minPrice = filters.minPrice;
+      }
 
-    if (filters.search) {
-      params.search = filters.search;
-    }
+      if (filters.search) {
+        params.search = filters.search;
+      }
 
-    if (filters.inStock !== null) {
-      params.inStock = filters.inStock;
-    }
+      if (filters.inStock !== null) {
+        params.inStock = filters.inStock;
+      }
 
-    if (filters.rating !== null) {
-      params.rating = filters.rating;
-    }
+      if (filters.rating !== null) {
+        params.rating = filters.rating;
+      }
 
-    return params;
-  }, [priceRange]);
+      return params;
+    },
+    [priceRange],
+  );
 
   // Fetch products
-  const fetchProducts = useCallback(async (page: number = 1, append: boolean = false) => {
-    // Cancel any ongoing request
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-    }
-
-    const abortController = new AbortController();
-    abortControllerRef.current = abortController;
-
-    try {
-      if (append) {
-        setIsFetchingMore(true);
-      } else {
-        setIsLoading(true);
+  const fetchProducts = useCallback(
+    async (page: number = 1, append: boolean = false) => {
+      // Cancel any ongoing request
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
       }
 
-      const params = buildQueryParams(activeFilters, page, pagination.limit);
-      const response = await api.get('/products', {
-        params,
-        signal: abortController.signal,
-      });
+      const abortController = new AbortController();
+      abortControllerRef.current = abortController;
 
-      const responseData = response.data.data || response.data;
-      const productsData = responseData.products || responseData.items || responseData;
-      const paginationData = responseData.pagination || response.data.pagination || {};
+      try {
+        if (append) {
+          setIsFetchingMore(true);
+        } else {
+          setIsLoading(true);
+        }
 
-      // Transform products if needed
-      const transformedProducts = Array.isArray(productsData) 
-        ? productsData.map((product: any) => ({
-            ...product,
-            // Ensure consistent field names
-            pricePerDay: product.pricePerDay || product.price_per_day || product.daily_rate || 0,
-            reviewsCount: product.reviewsCount || product.reviews_count || product.review_count || 0,
-            image: product.image || product.thumbnail || product.image_url || '',
-          }))
-        : [];
+        const params = buildQueryParams(activeFilters, page, pagination.limit);
+        const response = await api.get("/products", {
+          params,
+          signal: abortController.signal,
+        });
 
-      if (append) {
-        setProducts(prev => [...prev, ...transformedProducts]);
-      } else {
-        setProducts(transformedProducts);
+        const responseData = response.data.data || response.data;
+        const productsData =
+          responseData.products || responseData.items || responseData;
+        const paginationData =
+          responseData.pagination || response.data.pagination || {};
+
+        // Transform products if needed
+        const transformedProducts = Array.isArray(productsData)
+          ? productsData.map((product: any) => ({
+              ...product,
+              // Ensure consistent field names
+              pricePerDay:
+                product.pricePerDay ||
+                product.price_per_day ||
+                product.daily_rate ||
+                0,
+              reviewsCount:
+                product.reviewsCount ||
+                product.reviews_count ||
+                product.review_count ||
+                0,
+              image:
+                product.image || product.thumbnail || product.image_url || "",
+            }))
+          : [];
+
+        if (append) {
+          setProducts((prev) => [...prev, ...transformedProducts]);
+        } else {
+          setProducts(transformedProducts);
+        }
+
+        setPagination({
+          page: paginationData.page || page,
+          totalPages:
+            paginationData.totalPages ||
+            Math.ceil((paginationData.total || 0) / pagination.limit),
+          total: paginationData.total || 0,
+          from: paginationData.from || (page - 1) * pagination.limit + 1,
+          to:
+            paginationData.to ||
+            Math.min(page * pagination.limit, paginationData.total || 0),
+          limit: paginationData.limit || pagination.limit,
+        });
+
+        setError(null);
+      } catch (err: any) {
+        // Don't update state if request was cancelled
+        if (err?.name === "AbortError" || err?.code === "ERR_CANCELED") {
+          return;
+        }
+
+        setError(
+          err instanceof Error ? err : new Error("Failed to fetch products"),
+        );
+
+        // Clear products on error if it's the first page
+        if (page === 1) {
+          setProducts([]);
+        }
+      } finally {
+        setIsLoading(false);
+        setIsFetchingMore(false);
       }
-
-      setPagination({
-        page: paginationData.page || page,
-        totalPages: paginationData.totalPages || Math.ceil((paginationData.total || 0) / pagination.limit),
-        total: paginationData.total || 0,
-        from: paginationData.from || ((page - 1) * pagination.limit + 1),
-        to: paginationData.to || Math.min(page * pagination.limit, paginationData.total || 0),
-        limit: paginationData.limit || pagination.limit,
-      });
-
-      setError(null);
-    } catch (err: any) {
-      // Don't update state if request was cancelled
-      if (err?.name === 'AbortError' || err?.code === 'ERR_CANCELED') {
-        return;
-      }
-
-      setError(err instanceof Error ? err : new Error('Failed to fetch products'));
-      
-      // Clear products on error if it's the first page
-      if (page === 1) {
-        setProducts([]);
-      }
-    } finally {
-      setIsLoading(false);
-      setIsFetchingMore(false);
-    }
-  }, [activeFilters, pagination.limit, buildQueryParams]);
+    },
+    [activeFilters, pagination.limit, buildQueryParams],
+  );
 
   // Fetch categories with counts
   const fetchCategories = useCallback(async () => {
     try {
-      const response = await api.get('/products/categories');
+      const response = await api.get("/products/categories");
       const data = response.data.data || response.data;
-      
+
       if (Array.isArray(data)) {
         setCategories(data);
       } else if (data.categories && data.counts) {
@@ -202,16 +235,16 @@ export function useProducts() {
         setCategories(Array.isArray(data) ? data : []);
       }
     } catch (err) {
-      console.error('Failed to fetch categories:', err);
+      console.error("Failed to fetch categories:", err);
     }
   }, []);
 
   // Fetch brands with counts
   const fetchBrands = useCallback(async () => {
     try {
-      const response = await api.get('/products/brands');
+      const response = await api.get("/products/brands");
       const data = response.data.data || response.data;
-      
+
       if (Array.isArray(data)) {
         setBrands(data);
       } else if (data.brands && data.counts) {
@@ -221,42 +254,42 @@ export function useProducts() {
         setBrands(Array.isArray(data) ? data : []);
       }
     } catch (err) {
-      console.error('Failed to fetch brands:', err);
+      console.error("Failed to fetch brands:", err);
     }
   }, []);
 
   // Fetch price range
   const fetchPriceRange = useCallback(async () => {
     try {
-      const response = await api.get('/products/price-range');
+      const response = await api.get("/products/price-range");
       const data = response.data.data || response.data;
-      
+
       if (data) {
         const range = {
           min: data.min || 0,
           max: data.max || 500,
         };
         setPriceRange(range);
-        
+
         // Update max price in filters if it exceeds the range
-        setActiveFilters(prev => ({
+        setActiveFilters((prev) => ({
           ...prev,
           maxPrice: Math.min(prev.maxPrice, range.max),
           minPrice: Math.max(prev.minPrice, range.min),
         }));
       }
     } catch (err) {
-      console.error('Failed to fetch price range:', err);
+      console.error("Failed to fetch price range:", err);
     }
   }, []);
 
   // Apply filters with debounce
   const filterProducts = useCallback((newFilters: Partial<FilterOptions>) => {
-    setActiveFilters(prev => {
+    setActiveFilters((prev) => {
       const updated = { ...prev, ...newFilters };
-      
+
       // Reset to page 1 when filters change
-      setPagination(prevPagination => ({
+      setPagination((prevPagination) => ({
         ...prevPagination,
         page: 1,
       }));
@@ -268,12 +301,12 @@ export function useProducts() {
   // Debounced effect for filter changes
   useEffect(() => {
     const filtersString = JSON.stringify(activeFilters);
-    
+
     // Skip if filters haven't actually changed
     if (filtersString === previousFiltersRef.current) {
       return;
     }
-    
+
     previousFiltersRef.current = filtersString;
 
     // Clear previous debounce timer
@@ -294,16 +327,19 @@ export function useProducts() {
   }, [activeFilters, fetchProducts]);
 
   // Change page
-  const changePage = useCallback((page: number) => {
-    setPagination(prev => ({ ...prev, page }));
-    fetchProducts(page);
-  }, [fetchProducts]);
+  const changePage = useCallback(
+    (page: number) => {
+      setPagination((prev) => ({ ...prev, page }));
+      fetchProducts(page);
+    },
+    [fetchProducts],
+  );
 
   // Load more products (infinite scroll)
   const loadMore = useCallback(() => {
     if (!isFetchingMore && pagination.page < pagination.totalPages) {
       const nextPage = pagination.page + 1;
-      setPagination(prev => ({ ...prev, page: nextPage }));
+      setPagination((prev) => ({ ...prev, page: nextPage }));
       fetchProducts(nextPage, true);
     }
   }, [isFetchingMore, pagination.page, pagination.totalPages, fetchProducts]);
@@ -313,29 +349,32 @@ export function useProducts() {
     try {
       const response = await api.get(`/products/${productId}`);
       const product = response.data.data || response.data;
-      
+
       const transformedProduct: Product = {
         ...product,
         pricePerDay: product.pricePerDay || product.price_per_day || 0,
         reviewsCount: product.reviewsCount || product.reviews_count || 0,
-        image: product.image || product.thumbnail || '',
+        image: product.image || product.thumbnail || "",
       };
-      
+
       setSelectedProduct(transformedProduct);
       return transformedProduct;
     } catch (err) {
-      throw err instanceof Error ? err : new Error('Failed to fetch product');
+      throw err instanceof Error ? err : new Error("Failed to fetch product");
     }
   }, []);
 
   // Search products
-  const searchProducts = useCallback((query: string) => {
-    filterProducts({ search: query });
-  }, [filterProducts]);
+  const searchProducts = useCallback(
+    (query: string) => {
+      filterProducts({ search: query });
+    },
+    [filterProducts],
+  );
 
   // Clear all filters
   const clearAllFilters = useCallback(() => {
-    setActiveFilters(prev => ({
+    setActiveFilters((prev) => ({
       ...DEFAULT_FILTERS,
       maxPrice: priceRange.max,
       minPrice: priceRange.min,
@@ -343,20 +382,23 @@ export function useProducts() {
   }, [priceRange]);
 
   // Set category (for catalog header display)
-  const setCategory = useCallback((categoryName: string | null) => {
-    if (categoryName) {
-      filterProducts({ categories: [categoryName] });
-    } else {
-      filterProducts({ categories: [] });
-    }
-  }, [filterProducts]);
+  const setCategory = useCallback(
+    (categoryName: string | null) => {
+      if (categoryName) {
+        filterProducts({ categories: [categoryName] });
+      } else {
+        filterProducts({ categories: [] });
+      }
+    },
+    [filterProducts],
+  );
 
   // Initial load
   useEffect(() => {
     fetchCategories();
     fetchBrands();
     fetchPriceRange();
-    
+
     return () => {
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
@@ -370,20 +412,21 @@ export function useProducts() {
   return {
     // Data
     products,
+    category: activeFilters.categories[0] || null,
     categories,
     brands,
     categoryCounts,
     brandCounts,
     priceRange,
     selectedProduct,
-    
+
     // State
     isLoading,
     isFetchingMore,
     error,
     pagination,
     activeFilters,
-    
+
     // Actions
     filterProducts,
     clearAllFilters,
@@ -393,7 +436,7 @@ export function useProducts() {
     fetchProductById,
     setCategory,
     refetch: () => fetchProducts(1),
-    
+
     // Utilities
     hasMore: pagination.page < pagination.totalPages,
     isEmpty: !isLoading && products.length === 0,
