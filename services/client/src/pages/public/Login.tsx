@@ -3,6 +3,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { Building2, User, Truck, Briefcase, Mail, Lock, ArrowRight, User as UserIcon, ShieldCheck } from 'lucide-react';
 
 type Step = 'login' | 'signup' | 'otp';
+type Role = 'admin' | 'customer' | 'delivery';
 
 export default function Login() {
   const { login, signup, verifyOTP, resendOTP } = useAuth();
@@ -12,6 +13,7 @@ export default function Login() {
   const [name, setName] = useState('');
   const [otp, setOtp] = useState('');
   const [userId, setUserId] = useState<string | null>(null);
+  const [role, setRole] = useState<Role>('customer'); // ✅ Role state
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const submitRef = useRef<HTMLButtonElement | null>(null);
@@ -28,17 +30,13 @@ export default function Login() {
       if (step === 'login') {
         try {
           await login(email, password);
-          // Success → AuthProvider redirects to dashboard
         } catch (err: any) {
           const message = err.message || '';
-          // Check if backend returned "email not verified"
           if (message.toLowerCase().includes('verify your email')) {
-            // Backend likely returns userId in the error response
             const backendUserId = err.response?.data?.userId;
             if (backendUserId) {
               setUserId(backendUserId);
             } else {
-              // Fallback: try to get userId from stored user data
               const storedUser = localStorage.getItem('user');
               if (storedUser) {
                 try {
@@ -47,7 +45,6 @@ export default function Login() {
                 } catch {}
               }
             }
-            // Resend OTP to the email
             await resendOTP(userId || '', email);
             setStep('otp');
             setError('Please verify your email. A new OTP has been sent.');
@@ -56,7 +53,8 @@ export default function Login() {
           }
         }
       } else if (step === 'signup') {
-        const result = await signup(name, email, password);
+        // ✅ Pass the selected role to signup
+        const result = await signup(name, email, password, role);
         if (result?.userId) {
           setUserId(result.userId);
           setStep('otp');
@@ -84,7 +82,6 @@ export default function Login() {
     try {
       if (!userId) throw new Error('User ID missing. Please start over.');
       await verifyOTP(userId, otp);
-      // After successful verification, log the user in
       await login(email, password);
     } catch (err: any) {
       setError(err.message || 'OTP verification failed. Please try again.');
@@ -94,11 +91,12 @@ export default function Login() {
   };
 
   // ============================================================
-  // Auto‑fill demo accounts
+  // Auto‑fill demo accounts with role switching
   // ============================================================
-  const autofillDemo = (demoEmail: string) => {
+  const autofillDemo = (demoEmail: string, demoRole: Role) => {
     setEmail(demoEmail);
     setPassword('password123');
+    setRole(demoRole); // ✅ Set the role
     setStep('login');
     setTimeout(() => {
       submitRef.current?.click();
@@ -161,22 +159,27 @@ export default function Login() {
                 Demo Accounts (Click to auto‑fill)
               </p>
               <div className="flex flex-col gap-2">
+                {/* ✅ Admin Button */}
                 <button
-                  onClick={() => autofillDemo('admin@rentflow.com')}
+                  onClick={() => autofillDemo('admin@rentflow.com', 'admin')}
                   className="group text-left text-sm bg-white/5 hover:bg-white/15 border border-white/10 hover:border-white/25 px-4 py-2.5 rounded-lg transition-all duration-200 flex items-center gap-2 hover:translate-x-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
                 >
                   <Building2 className="w-4 h-4 text-primary-container shrink-0 group-hover:scale-110 transition-transform" />
                   <span className="font-semibold text-white">Admin Portal</span>
                 </button>
+
+                {/* ✅ Customer Button */}
                 <button
-                  onClick={() => autofillDemo('john@example.com')}
+                  onClick={() => autofillDemo('john@example.com', 'customer')}
                   className="group text-left text-sm bg-white/5 hover:bg-white/15 border border-white/10 hover:border-white/25 px-4 py-2.5 rounded-lg transition-all duration-200 flex items-center gap-2 hover:translate-x-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
                 >
                   <UserIcon className="w-4 h-4 text-primary-container shrink-0 group-hover:scale-110 transition-transform" />
                   <span className="font-semibold text-white">Customer Portal</span>
                 </button>
+
+                {/* ✅ Delivery Button */}
                 <button
-                  onClick={() => autofillDemo('dave@rentflow.com')}
+                  onClick={() => autofillDemo('dave@rentflow.com', 'delivery')}
                   className="group text-left text-sm bg-white/5 hover:bg-white/15 border border-white/10 hover:border-white/25 px-4 py-2.5 rounded-lg transition-all duration-200 flex items-center gap-2 hover:translate-x-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
                 >
                   <Truck className="w-4 h-4 text-primary-container shrink-0 group-hover:scale-110 transition-transform" />
@@ -267,6 +270,28 @@ export default function Login() {
                 </div>
               </div>
 
+              {/* ✅ Role Selector (only for signup) */}
+              {step === 'signup' && (
+                <div>
+                  <label className="block text-sm font-bold text-on-surface mb-2">Select Role</label>
+                  <div className="flex gap-4 bg-surface-muted p-3 rounded-xl border border-border-standard">
+                    {['customer', 'admin', 'delivery'].map((r) => (
+                      <label key={r} className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="role"
+                          value={r}
+                          checked={role === r}
+                          onChange={() => setRole(r as Role)}
+                          className="accent-primary w-4 h-4"
+                        />
+                        <span className="font-medium text-sm capitalize">{r}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div className="flex items-center justify-between gap-4">
                 <button
                   type="submit"
@@ -349,7 +374,6 @@ export default function Login() {
                   onClick={() => {
                     setOtp('');
                     setError(null);
-                    // In a real app you'd call resendOTP here
                     alert('OTP resent! Check your email.');
                   }}
                   className="font-semibold text-primary hover:underline"
