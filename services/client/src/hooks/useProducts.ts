@@ -71,7 +71,7 @@ export function useProducts() {
   const [activeFilters, setActiveFilters] = useState<FilterOptions>(DEFAULT_FILTERS);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   
-  const debounceTimerRef = useRef<NodeJS.Timeout>();
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   const previousFiltersRef = useRef<string>('');
 

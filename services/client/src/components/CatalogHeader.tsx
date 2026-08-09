@@ -17,14 +17,14 @@ export default function CatalogHeader({
   onSortChange,
   onFilterClick 
 }: CatalogHeaderProps) {
-  const { products, pagination, category, isLoading } = useProducts();
+  const { products, pagination, activeFilters, isLoading } = useProducts();
 
   // Validate pagination data before displaying
   const hasValidPagination = pagination && typeof pagination.from === 'number' && typeof pagination.to === 'number' && typeof pagination.total === 'number';
   const from = hasValidPagination ? pagination.from : 0;
   const to = hasValidPagination ? pagination.to : 0;
   const total = hasValidPagination ? pagination.total : 0;
-  const displayCategory = category || 'All Products';
+  const displayCategory = activeFilters?.categories?.[0] || 'All Products';
 
   const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     onSortChange(e.target.value);

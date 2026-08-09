@@ -175,7 +175,7 @@ export default function MyRentals() {
                 ? Math.max(
                     0,
                     Math.ceil(
-                      (new Date(rental.end_date).getTime() - Date.now()) /
+                      (new Date(rental.endDate).getTime() - Date.now()) /
                         (1000 * 60 * 60 * 24),
                     ),
                   )
@@ -212,7 +212,7 @@ export default function MyRentals() {
                                 : "Completed"}
                       </div>
                       <div className="font-mono text-sm text-outline font-medium">
-                        Order #{rental.rental_number}
+                        Order #{rental.rentalNumber}
                       </div>
                     </div>
                     {isActive && (
@@ -231,20 +231,20 @@ export default function MyRentals() {
                   </div>
 
                   <div className="flex gap-6">
-                    <div className="w-24 h-24 bg-surface-container-low rounded-lg p-2 border border-border-standard flex-shrink-0">
+                    <div className="w-24 h-24 bg-surface-container-low rounded-lg p-2 border border-border-standard shrink-0">
                       <img
                         src={
-                          rental.product_image ||
+                          rental.productImage ||
                           "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&q=80&w=200"
                         }
-                        alt={rental.product_name}
+                        alt={rental.productName}
                         className="w-full h-full object-contain mix-blend-multiply"
                         referrerPolicy="no-referrer"
                       />
                     </div>
                     <div className="flex-1">
                       <h3 className="font-bold text-lg text-on-surface mb-2">
-                        {rental.product_name}
+                        {rental.productName}
                       </h3>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
@@ -252,8 +252,8 @@ export default function MyRentals() {
                             Rental Period
                           </div>
                           <div className="font-bold text-sm text-on-surface">
-                            {formatDate(rental.start_date)} -{" "}
-                            {formatDate(rental.end_date)}
+                            {formatDate(rental.startDate)} -{" "}
+                            {formatDate(rental.endDate)}
                           </div>
                         </div>
                         <div>
@@ -261,7 +261,7 @@ export default function MyRentals() {
                             Total Paid
                           </div>
                           <div className="font-bold text-sm text-primary">
-                            {formatCurrency(rental.total_amount)}
+                            {formatCurrency(rental.totalAmount)}
                           </div>
                         </div>
                       </div>
@@ -300,8 +300,8 @@ export default function MyRentals() {
                     {(isReturned || isOverdue) && (
                       <button
                         onClick={() =>
-                          rental.product_id &&
-                          handleRentAgain(rental.product_id)
+                          rental.productId &&
+                          handleRentAgain(rental.productId)
                         }
                         className="px-4 py-2 bg-primary text-white rounded-lg text-sm font-bold hover:bg-opacity-90 transition-opacity"
                       >
@@ -374,10 +374,10 @@ export default function MyRentals() {
               />
               <div>
                 <h4 className="font-bold text-sm text-on-surface">
-                  {selectedRental.product_name}
+                  {selectedRental.productName}
                 </h4>
                 <p className="text-xs text-outline font-medium">
-                  Current end date: {formatDate(selectedRental.end_date)}
+                  Current end date: {formatDate(selectedRental.endDate)}
                 </p>
               </div>
             </div>

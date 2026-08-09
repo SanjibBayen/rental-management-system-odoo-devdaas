@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { ArrowUpRight, TrendingUp, Users, Package } from 'lucide-react';
 import { useDashboard } from '../../hooks/useDashboard';
@@ -27,7 +27,7 @@ export default function Analytics() {
 
     // Group rentals by month
     const monthlyData: Record<string, number> = {};
-    rentals.forEach((rental) => {
+    rentals.forEach((rental: any) => {
       const month = new Date(rental.start_date).toLocaleString('en-US', { month: 'short' });
       monthlyData[month] = (monthlyData[month] || 0) + rental.total_amount;
     });

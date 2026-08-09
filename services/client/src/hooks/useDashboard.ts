@@ -83,8 +83,8 @@ export function useDashboard(options: UseDashboardOptions = {}) {
   });
 
   const abortControllerRef = useRef<AbortController | null>(null);
-  const retryTimeoutRef = useRef<NodeJS.Timeout>();
-  const refreshIntervalRef = useRef<NodeJS.Timeout>();
+  const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const refreshIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Transform raw API data to frontend format
   const transformDashboardData = (data: any): DashboardStats => {

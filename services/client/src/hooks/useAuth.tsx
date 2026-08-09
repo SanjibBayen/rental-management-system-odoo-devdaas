@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+﻿import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { api } from "../services/api";
 
 export type Role = "admin" | "customer" | "delivery";
@@ -121,7 +121,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       (config) => {
         const token = localStorage.getItem("token");
         if (token) {
-          config.headers = config.headers || {};
+          config.headers = config.headers || ({} as import("axios").AxiosRequestHeaders);
           config.headers.Authorization = `Bearer ${token}`;
         }
         return config;

@@ -495,7 +495,7 @@ export default function Sidebar() {
                     [&::-webkit-slider-thumb]:bg-primary 
                     [&::-webkit-slider-thumb]:shadow-md
                     [&::-webkit-slider-thumb]:cursor-pointer
-                    [&::-webkit-slider-thumb]:mt-[-6px]
+                    [&::-webkit-slider-thumb]:-mt-1.5
                     [&::-moz-range-track]:h-2 
                     [&::-moz-range-track]:rounded-full 
                     [&::-moz-range-track]:bg-surface-muted
